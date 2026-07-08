@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>HonorVet · Nurse Pay Rate Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--sans:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;--em:#10b981;--emD:#059669;--emDD:#064e3b;--amD:#d97706;--rd:#ef4444}
+html,body{height:100vh;overflow:hidden}
+body{font-family:var(--sans);background:linear-gradient(135deg,#0f172a 0%,#1e293b 40%,#0f2027 100%);-webkit-font-smoothing:antialiased;color:#fff;display:flex;flex-direction:column}
+
+/* TOP BAR */
+.top{height:48px;display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.06)}
+.top-logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#34d399,#059669);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;box-shadow:0 2px 10px rgba(16,185,129,.4)}
+.top-brand{font-size:.9rem;font-weight:800;letter-spacing:-.01em}
+.top-sep{width:1px;height:18px;background:rgba(255,255,255,.1)}
+.top-sub{font-size:.68rem;font-weight:600;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em}
+.top-tabs{margin-left:auto;display:flex;gap:3px;background:rgba(255,255,255,.06);border-radius:10px;padding:3px;border:1px solid rgba(255,255,255,.06)}
+.top-tab{padding:5px 12px;border:none;border-radius:7px;font-family:var(--sans);font-size:.7rem;font-weight:600;color:rgba(255,255,255,.5);cursor:pointer;background:transparent;transition:all .2s;display:flex;align-items:center;gap:5px}
+.top-tab:hover{color:rgba(255,255,255,.85)}
+.top-tab.on{background:rgba(255,255,255,.13);color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.pill{font-size:.5rem;font-weight:700;border-radius:3px;padding:1px 5px}
+.pill.r{background:rgba(239,68,68,.2);color:#fca5a5}
+.pill.b{background:rgba(99,102,241,.2);color:#a5b4fc}
+.pill.g{background:rgba(16,185,129,.2);color:#6ee7b7}
+.pill.h{background:rgba(245,158,11,.2);color:#fcd34d}
+
+/* MAIN — TWO COLUMN LAYOUT */
+.main{flex:1;overflow:hidden;display:grid;grid-template-columns:1fr 1fr 1.3fr;padding:10px 10px 6px;gap:10px;min-height:0}
+
+.panel{display:flex;flex-direction:column;min-height:0;background:#fff;color:#0f172a;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.15),0 16px 40px rgba(0,0,0,.25);overflow:hidden;min-width:0}
+
+.panel-billing .panel-head{background:linear-gradient(135deg,#eff6ff,#dbeafe);border-bottom-color:#bfdbfe}
+.panel-package .panel-head{background:linear-gradient(135deg,#fef3c7,#fde68a);border-bottom-color:#fcd34d}
+.panel-results .panel-head{background:linear-gradient(135deg,#ecfdf5,#d1fae5);border-bottom-color:#a7f3d0}
+.panel-billing .panel-title-ico{background:#bfdbfe;color:#1e40af}
+.panel-package .panel-title-ico{background:#fcd34d;color:#92400e}
+.panel-results .panel-title-ico{background:#a7f3d0;color:#065f46}
+
+.panel-head{padding:9px 14px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:9px;flex-shrink:0}
+.panel-title-ico{width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+.panel-title-wrap{display:flex;flex-direction:column;min-width:0;flex:1}
+.panel-title{font-size:.78rem;font-weight:800;color:#0f172a;letter-spacing:-.01em;line-height:1.2}
+.panel-sub{font-size:.56rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-top:1px}
+.panel-body{flex:1;overflow-y:auto;padding:10px 12px 14px;scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent}
+.panel-body::-webkit-scrollbar{width:6px}
+.panel-body::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+
+/* FORM */
+.section-head{display:flex;align-items:center;gap:6px;margin:9px 0 5px;font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#94a3b8}
+.section-head:first-child{margin-top:0}
+.section-head::after{content:'';flex:1;height:1px;background:#e2e8f0}
+.section-head .badge{padding:1px 6px;border-radius:3px;font-size:.5rem;font-weight:700;background:#fef3c7;color:#92400e}
+
+.fg{margin-bottom:5px}
+.fg>label{display:block;font-size:.6rem;font-weight:600;color:#64748b;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fg>label .dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:#fb923c;margin-left:3px;vertical-align:middle}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px}
+.iw{position:relative}
+.pfx{position:absolute;left:7px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:.68rem;font-weight:700;color:var(--amD);pointer-events:none}
+.sfx{position:absolute;right:7px;top:50%;transform:translateY(-50%);font-size:.62rem;color:#94a3b8;pointer-events:none}
+input[type=number],select{width:100%;border-radius:8px;font-family:var(--mono);font-size:.74rem;font-weight:500;color:#0f172a;outline:none;padding:5px 8px;transition:all .15s;background:#f8fafc;border:1.5px solid #e2e8f0}
+input:focus,select:focus{border-color:var(--em);box-shadow:0 0 0 3px rgba(16,185,129,.12);background:#fff}
+input.rq{background:#fffbeb;border:2px solid #fbbf24}
+input.rq:focus{border-color:var(--amD);box-shadow:0 0 0 3px rgba(245,158,11,.1);background:#fff}
+input.hp{padding-left:18px}input.hs{padding-right:24px}
+select{font-family:var(--sans);font-weight:500;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:26px}
+.tg{display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:4px 10px;margin-bottom:4px}
+.tg-l{font-size:.68rem;font-weight:600;color:#475569}
+.tg-sw{display:flex;background:#e5e7eb;border-radius:6px;padding:2px;gap:2px}
+.tg-sw button{padding:3px 11px;border:none;border-radius:5px;font-family:var(--sans);font-size:.62rem;font-weight:700;cursor:pointer;background:transparent;color:#94a3b8;transition:all .12s}
+.tg-sw button.on{background:var(--em);color:#fff;box-shadow:0 1px 4px rgba(16,185,129,.25)}
+.tg-sw button.off{background:#fef2f2;color:var(--rd)}
+.legend{display:flex;gap:10px;margin-top:8px;padding-top:7px;border-top:1px solid #f1f5f9;font-size:.56rem;color:#94a3b8;font-weight:500;justify-content:center}
+.legend-item{display:flex;align-items:center;gap:5px}
+.legend-sw{width:14px;height:10px;border-radius:3px}
+.legend-sw.rq{background:#fffbeb;border:2px solid #fbbf24}
+.legend-sw.df{background:#f8fafc;border:1.5px solid #e2e8f0}
+
+/* RESULTS PANEL */
+.results-body{padding:10px 12px 14px;overflow-y:auto;flex:1;scrollbar-width:thin}
+.results-body::-webkit-scrollbar{width:6px}
+.results-body::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+
+.hero{border-radius:12px;padding:12px 16px;position:relative;overflow:hidden;margin-bottom:8px;transition:all .3s}
+.hero.pos{background:linear-gradient(135deg,#064e3b,#047857,#059669);box-shadow:0 6px 24px rgba(5,150,105,.25)}
+.hero.neg{background:linear-gradient(135deg,#7f1d1d,#b91c1c,#ef4444);box-shadow:0 6px 24px rgba(239,68,68,.25)}
+.hero::before{content:'';position:absolute;top:-30%;right:-15%;width:50%;height:160%;border-radius:50%;background:rgba(255,255,255,.04)}
+.hero-row{display:flex;flex-direction:column;gap:8px;position:relative;z-index:1}
+.hero-left{min-width:0}
+.rh-label{font-size:.56rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:rgba(255,255,255,.5);margin-bottom:4px}
+.rh-num{font-family:var(--mono);font-weight:900;color:#fff;font-size:2.2rem;line-height:1;letter-spacing:-1.5px}
+.hero.neg .rh-num{color:#fecaca}
+.rh-num .ds{font-size:.95rem;opacity:.4;vertical-align:top;margin-top:3px;display:inline-block;margin-right:2px}
+.rh-sub{font-size:.58rem;color:rgba(255,255,255,.4);font-weight:500;margin-top:2px}
+.rh-kpis{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.rh-kpi{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.08);border-radius:7px;padding:5px 8px}
+.rh-kpi-l{font-size:.46rem;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:1px}
+.rh-kpi-v{font-family:var(--mono);font-size:.74rem;font-weight:700;color:#fff}
+
+.r-card{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:11px;padding:9px 12px;margin-bottom:7px}
+.r-card-h{font-size:.54rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;margin-bottom:6px}
+.r-metrics{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.r-met{border-radius:8px;padding:6px 9px;border:1.5px solid #e2e8f0;background:#fff;min-width:0}
+.r-met.hi{background:#ecfdf5;border-color:#a7f3d0}
+.r-met.tl{background:#ecfeff;border-color:#a5f3fc}
+.r-met-l{font-size:.5rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.r-met-v{font-family:var(--mono);font-size:.76rem;font-weight:700;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r-met-v .d{color:var(--amD);font-size:.66rem}.r-met-v .u{font-size:.5rem;color:#94a3b8}
+table.bt{width:100%;border-collapse:collapse}
+.bt th{font-size:.52rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#cbd5e1;padding:0 6px 4px;text-align:right}
+.bt th:first-child{text-align:left}
+.bt td{font-size:.68rem;padding:3px 6px;border-top:1px solid #f1f5f9;text-align:right;font-family:var(--mono);font-weight:500;color:#475569}
+.bt td:first-child{text-align:left;font-family:var(--sans);color:#94a3b8;font-weight:600;font-size:.64rem}
+.bt tr.hl td{background:#ecfdf5;color:#065f46;font-weight:700}
+.bt tr.tot td{border-top:2px solid #e2e8f0;color:var(--emD);font-weight:700;padding-top:6px}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;padding-top:6px;border-top:1px solid #f1f5f9}
+.chip{font-size:.58rem;font-weight:600;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:2px 8px;font-family:var(--mono);color:#64748b}
+.auto-tile{background:#eef2ff;border:1.5px solid #c7d2fe;border-radius:8px;padding:5px 10px;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.auto-tile-l{font-size:.6rem;font-weight:700;color:#818cf8;text-transform:uppercase;letter-spacing:.04em}
+.auto-tile-v{font-family:var(--mono);font-size:.78rem;font-weight:700;color:#4338ca}
+
+/* ALT VIEWS — GUIDE & HISTORY take full main area */
+.alt-view{display:none;background:#fff;color:#0f172a;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.15),0 16px 40px rgba(0,0,0,.25);overflow-y:auto;scrollbar-width:thin}
+.alt-view::-webkit-scrollbar{width:8px}
+.alt-view::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}
+/* In guide/history mode: switch grid to single column, hide panels, show alt-view full width */
+body.guide-mode .main,body.history-mode .main{display:flex}
+body.guide-mode .main>.panel,body.history-mode .main>.panel{display:none}
+body.guide-mode .alt-view.guide,body.history-mode .alt-view.history{display:block;flex:1;min-height:0}
+
+/* GUIDE */
+.guide{padding:30px 44px 50px}
+.guide-inner{max-width:920px;margin:0 auto}
+.g-title{font-size:1.7rem;font-weight:900;color:#0f172a;letter-spacing:-.03em;margin-bottom:8px}
+.g-sub{font-size:.88rem;color:#64748b;line-height:1.7;margin-bottom:28px;max-width:680px}
+.g-section{margin-bottom:30px}
+.g-h{font-size:1.05rem;font-weight:800;color:#1e293b;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.g-h::before{content:'';width:4px;height:22px;border-radius:2px;background:linear-gradient(180deg,var(--em),var(--emD))}
+.g-p{font-size:.86rem;color:#475569;line-height:1.8;margin-bottom:12px}
+.g-p strong{color:#1e293b;font-weight:700}
+.g-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.g-card{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:18px;transition:all .15s}
+.g-card:hover{border-color:#a7f3d0;background:#ecfdf5;transform:translateY(-1px)}
+.g-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#ecfdf5,#d1fae5);display:flex;align-items:center;justify-content:center;font-size:1.05rem;margin-bottom:10px;border:1px solid #a7f3d0}
+.g-card-t{font-size:.9rem;font-weight:700;color:#0f172a;margin-bottom:5px}
+.g-card-d{font-size:.78rem;color:#64748b;line-height:1.6}
+.g-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.84rem;border-radius:10px;overflow:hidden;max-width:680px}
+.g-table th{background:#f8fafc;padding:10px 14px;text-align:left;font-weight:700;color:#64748b;border:1px solid #e2e8f0;font-size:.7rem;text-transform:uppercase;letter-spacing:.04em}
+.g-table td{padding:10px 14px;border:1px solid #e2e8f0;color:#475569}
+.g-table td.m{font-family:var(--mono);font-weight:600;color:#0f172a}
+.g-table tr.win td{background:#ecfdf5;color:#065f46;font-weight:600}
+.g-callout{background:#ecfdf5;border:1.5px solid #a7f3d0;border-radius:14px;padding:16px 20px;font-size:.86rem;color:#065f46;line-height:1.7;margin:14px 0;max-width:680px}
+.g-callout strong{font-weight:700}
+.g-warn{background:#fef2f2;border:1.5px solid #fecaca;border-radius:14px;padding:16px 20px;font-size:.86rem;color:#991b1b;line-height:1.7;margin:14px 0;max-width:680px}
+.g-tips{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+.g-tip{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;font-size:.78rem;color:#475569;line-height:1.55}
+.g-tip strong{color:#0f172a;display:block;margin-bottom:3px;font-weight:700;font-size:.82rem}
+
+/* HISTORY */
+.history{padding:28px 36px 40px}
+.h-inner{max-width:760px;margin:0 auto}
+.h-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.h-title{font-size:1.4rem;font-weight:900;color:#0f172a;letter-spacing:-.02em}
+.h-clear{padding:6px 14px;border-radius:8px;border:1.5px solid #fecaca;background:#fef2f2;color:#dc2626;font-size:.72rem;font-weight:700;cursor:pointer;font-family:var(--sans);transition:all .15s}
+.h-clear:hover{background:#fee2e2}
+.h-sub{font-size:.82rem;color:#64748b;margin-bottom:20px;line-height:1.55}
+.h-empty{text-align:center;padding:60px 20px;color:#94a3b8}
+.h-empty-icon{font-size:2.6rem;margin-bottom:12px;opacity:.4}
+.h-empty-t{font-size:1rem;font-weight:700;color:#475569;margin-bottom:6px}
+.h-empty-d{font-size:.8rem;color:#94a3b8;line-height:1.6}
+.h-list{display:flex;flex-direction:column;gap:8px}
+.h-item{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;overflow:hidden;transition:all .15s}
+.h-item:hover{border-color:#cbd5e1;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.h-item.open{border-color:var(--em);background:#fff;box-shadow:0 4px 16px rgba(16,185,129,.08)}
+.h-item-head{padding:12px 16px;cursor:pointer;display:flex;align-items:center;gap:14px}
+.h-item-margin{font-family:var(--mono);font-size:1.1rem;font-weight:800;min-width:100px;text-align:left}
+.h-item-margin.pos{color:var(--emD)}
+.h-item-margin.neg{color:var(--rd)}
+.h-item-body{flex:1;min-width:0}
+.h-item-name{font-size:.86rem;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.h-tag{font-size:.56rem;font-weight:700;padding:1px 5px;border-radius:3px;background:#f1f5f9;color:#64748b;text-transform:uppercase;letter-spacing:.04em}
+.h-tag.ca{background:#fef2f2;color:#dc2626}.h-tag.og{background:#eef2ff;color:#6366f1}
+.h-item-meta{font-size:.7rem;color:#94a3b8}
+.h-item-arrow{transition:transform .2s;color:#cbd5e1;flex-shrink:0}
+.h-item.open .h-item-arrow{transform:rotate(180deg);color:var(--em)}
+.h-item-detail{padding:0 16px;max-height:0;overflow:hidden;transition:all .3s;border-top:1px solid transparent}
+.h-item.open .h-item-detail{padding:16px;max-height:600px;border-top-color:#e2e8f0}
+.h-d-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.h-d-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:9px 11px}
+.h-d-h{font-size:.58rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.h-d-row{display:flex;justify-content:space-between;font-size:.74rem;padding:2px 0}
+.h-d-row span:first-child{color:#64748b}
+.h-d-row span:last-child{font-family:var(--mono);color:#0f172a;font-weight:600}
+.h-load-btn{width:100%;padding:9px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--em),var(--emD));color:#fff;font-family:var(--sans);font-size:.78rem;font-weight:700;cursor:pointer;transition:all .15s;box-shadow:0 2px 6px rgba(16,185,129,.25)}
+.h-load-btn:hover{box-shadow:0 4px 12px rgba(16,185,129,.35);transform:translateY(-1px)}
+
+/* FOOTER */
+.ft{text-align:center;padding:4px;font-size:.52rem;color:rgba(255,255,255,.25);font-weight:500;flex-shrink:0}
+.ft b{color:rgba(16,185,129,.5);font-weight:700}
+
+.zip-widget{background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:1.5px solid #a7f3d0;border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.zip-title{font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#065f46;margin-bottom:7px;display:flex;align-items:center;gap:5px}
+.zip-row{display:flex;gap:5px;align-items:center}
+.zip-input{flex:1;min-width:0;border-radius:8px;font-family:var(--mono);font-size:.74rem;font-weight:600;color:#0f172a;outline:none;padding:6px 9px;background:#fff;border:1.5px solid #a7f3d0;transition:all .15s}
+.zip-input:focus{border-color:var(--emD);box-shadow:0 0 0 3px rgba(5,150,105,.1)}
+.zip-btn{padding:6px 12px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--em),var(--emD));color:#fff;font-family:var(--sans);font-size:.68rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s;box-shadow:0 1px 4px rgba(16,185,129,.25);flex-shrink:0}
+.zip-btn:hover{box-shadow:0 3px 10px rgba(16,185,129,.35);transform:translateY(-1px)}
+.zip-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.zip-result{margin-top:7px;display:none}
+.zip-result.show{display:block}
+.zip-found{background:#fff;border:1px solid #a7f3d0;border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:8px}
+.zip-found-left{min-width:0}
+.zip-city{font-size:.68rem;font-weight:700;color:#065f46;margin-bottom:2px;display:flex;align-items:center;flex-wrap:wrap;gap:2px}
+.zip-breakdown{font-size:.6rem;color:#64748b;font-family:var(--mono);line-height:1.4}
+.zip-apply{padding:5px 12px;border:none;border-radius:7px;background:linear-gradient(135deg,var(--em),var(--emD));color:#fff;font-family:var(--sans);font-size:.64rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;box-shadow:0 1px 3px rgba(16,185,129,.2)}
+.zip-apply:hover{background:var(--emDD)}
+.zip-error{font-size:.72rem;color:#dc2626;font-weight:600;margin-top:5px;padding:6px 10px;background:#fef2f2;border-radius:7px;border:1px solid #fecaca}
+.zip-note{font-size:.54rem;color:#94a3b8;margin-top:4px;line-height:1.4}
+.tab-warn{display:none;padding:5px 12px;font-size:.66rem;font-weight:600;border-radius:0;text-align:center;gap:6px;align-items:center;justify-content:center}
+.tab-warn.show{display:flex}
+.tab-warn.std{background:#fffbeb;color:#92400e;border-bottom:1.5px solid #fde68a}
+.tab-warn.cal{background:#ecfdf5;color:#065f46;border-bottom:1.5px solid #a7f3d0}
+/* Mobile/small screen fallback */
+@media (max-width:1100px){
+  .main{grid-template-columns:1fr 1fr}
+  .panel-results{grid-column:1/-1}
+}
+@media (max-width:700px){
+  .main{grid-template-columns:1fr}
+  .panel-results{grid-column:auto}
+}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="top-logo">H</div>
+  <span class="top-brand">HonorVet Technologies</span>
+  <span class="top-sep"></span>
+  <span class="top-sub">Nurse Pay Calculator</span>
+  <div class="top-tabs">
+    <button class="top-tab on" id="tab-nc" onclick="setMode('nc')">Standard</button>
+    <button class="top-tab" id="tab-cal" onclick="setMode('cal')">California<span class="pill r">CA</span></button>
+    <button class="top-tab" id="tab-ogs" onclick="setMode('ogs')">OGS<span class="pill b">OGS</span></button>
+    <button class="top-tab" id="tab-guide" onclick="setMode('guide')">How to Use<span class="pill g">?</span></button>
+    <button class="top-tab" id="tab-history" onclick="setMode('history')">History<span class="pill h">7d</span></button>
+  </div>
+</div>
+
+<div class="tab-warn std show" id="warn-std">⚠️ Standard calculator is for contracts up to <strong>40 regular hrs/week</strong>. For 48-hr positions, use the <strong>California OT</strong> tab instead.</div>
+<div class="tab-warn cal" id="warn-cal">✅ California OT handles <strong>48-hr/week contracts</strong> with correct overtime thresholds — use this tab for all CA placements.</div>
+<div class="main">
+
+<!-- PANEL 1: BILLING -->
+<div class="panel panel-billing">
+  <div class="panel-head">
+    <div class="panel-title-ico">💰</div>
+    <div class="panel-title-wrap">
+      <span class="panel-title">Billing to Client</span>
+      <span class="panel-sub" id="mode-label">Standard</span>
+    </div>
+  </div>
+  <div class="panel-body">
+    <div class="row2">
+      <div class="fg"><label>Bill Rate <span class="dot"></span></label><div class="iw"><span class="pfx">$</span><input type="number" class="hp rq" id="i-billRate" value="100" step="0.01" oninput="calc()"/></div></div>
+      <div class="fg"><label>MSP Fee <span class="dot"></span></label><div class="iw"><input type="number" class="hs rq" id="i-mspFee" value="5" step="0.1" oninput="calc()"/><span class="sfx">%</span></div></div>
+    </div>
+    <div class="row2">
+      <div class="fg"><label>OT Multiplier</label><input type="number" id="i-otMult" value="1.25" step="0.01" oninput="calc()"/></div>
+      <div class="fg"><label>OT After (hrs)</label><input type="number" id="i-otAfter" value="40" step="1" oninput="calc()"/></div>
+    </div>
+    <div class="row3">
+      <div class="fg"><label>Reg Hrs/Wk <span class="dot"></span></label><input type="number" class="rq" id="i-regHrs" value="36" step="1" oninput="calc();refreshZip()"/></div>
+      <div class="fg"><label>OT Hrs/Wk <span class="dot"></span></label><input type="number" class="rq" id="i-otHrs" value="20" step="1" oninput="calc()"/></div>
+      <div class="fg"><label>Weeks <span class="dot"></span></label><input type="number" class="rq" id="i-weeks" value="13" step="1" oninput="calc()"/></div>
+    </div>
+    <div class="row2">
+      <div class="fg"><label>Orient Hrs</label><input type="number" id="i-orientHrs" value="0" step="1" oninput="calc()"/></div>
+      <div class="fg"><label>On-Call Rate</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-onCall" value="15" step="0.01" oninput="calc()"/></div></div>
+    </div>
+    <div class="fg"><label>Call-Back Multiplier</label><input type="number" id="i-cbMult" value="1.3" step="0.01" oninput="calc()"/></div>
+    <div class="section-head">GSA Per Diem Lookup</div>
+    <div class="zip-widget">
+      <div class="zip-title">📍 GSA Per Diem Lookup</div>
+      <div class="zip-row">
+        <input class="zip-input" id="zip-input" type="text" maxlength="5" placeholder="ZIP code" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
+        <select id="zip-month" style="width:84px;border-radius:8px;font-family:var(--sans);font-size:.68rem;font-weight:600;padding:6px 4px;border:1.5px solid #a7f3d0;background:#fff;color:#065f46;outline:none;cursor:pointer;flex-shrink:0">
+          <option value="max">Peak Month</option>
+          <option value="0">Oct</option><option value="1">Nov</option><option value="2">Dec</option>
+          <option value="3">Jan</option><option value="4">Feb</option><option value="5">Mar</option>
+          <option value="6">Apr</option><option value="7">May</option><option value="8">Jun</option>
+          <option value="9">Jul</option><option value="10">Aug</option><option value="11">Sep</option>
+        </select>
+        <button class="zip-btn" id="zip-btn" onclick="lookupZip()">Look Up</button>
+      </div>
+      <div class="zip-result" id="zip-result"></div>
+      <div class="zip-note">Base rates from GSA FY2025. Rates vary by month — <a href="https://www.gsa.gov/travel/plan-book/per-diem-rates/per-diem-rates-lookup" target="_blank" style="color:#059669;text-decoration:underline;font-weight:600">verify on GSA.gov</a></div>
+    </div>
+    <div class="section-head">Client</div>
+    <select id="i-client" onchange="pickClient()"><option value="">Select client (optional)</option></select>
+    <div class="fg" style="margin-top:6px"><label>Manual Fee Override</label><div class="iw"><input type="number" class="hs" id="i-manualFee" placeholder="—" step="0.01" oninput="calc()"/><span class="sfx">%</span></div></div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-sw rq"></div>Required</div>
+      <div class="legend-item"><div class="legend-sw df"></div>Default</div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL 2: NURSE PACKAGE -->
+<div class="panel panel-package">
+  <div class="panel-head">
+    <div class="panel-title-ico">👩‍⚕️</div>
+    <div class="panel-title-wrap">
+      <span class="panel-title">Nurse Package</span>
+      <span class="panel-sub">What the nurse receives</span>
+    </div>
+  </div>
+  <div class="panel-body">
+    <div class="fg"><label>W-2 Hourly Rate <span class="dot"></span></label><div class="iw"><span class="pfx">$</span><input type="number" class="hp rq" id="i-w2" value="13" step="0.01" oninput="calc()"/></div></div>
+
+    <div id="nc-pkg">
+      <div class="section-head">Stipend (Non-Taxable)</div>
+      <div class="tg"><span class="tg-l">Stipend Offered?</span><div class="tg-sw"><button id="b-stip-y" class="on" onclick="tog('stip','Y')">Y</button><button id="b-stip-n" onclick="tog('stip','N')">N</button></div></div>
+      <div id="stip-fields">
+        <div class="fg"><label>Stipend (Hourly) <span class="dot"></span></label><div class="iw"><span class="pfx">$</span><input type="number" class="hp rq" id="i-stipend" value="68.95" step="0.01" oninput="calc()"/></div></div>
+        <div class="tg"><span class="tg-l">Stipend on OT?</span><div class="tg-sw"><button id="b-stipOT-y" class="on" onclick="tog('stipOT','Y')">Y</button><button id="b-stipOT-n" onclick="tog('stipOT','N')">N</button></div></div>
+        <div id="ot-stip-row" class="fg"><label>OT Stipend (Hourly) <span class="dot"></span></label><div class="iw"><span class="pfx">$</span><input type="number" class="hp rq" id="i-otStipend" value="65.05" step="0.01" oninput="calc()"/></div></div>
+        <div class="tg"><span class="tg-l">Stipend on Orientation?</span><div class="tg-sw"><button id="b-stipOrient-y" onclick="tog('stipOrient','Y')">Y</button><button id="b-stipOrient-n" class="off" onclick="tog('stipOrient','N')">N</button></div></div>
+      </div>
+      <div class="section-head">One-Time &amp; Benefits</div>
+      <input type="hidden" id="i-medTests" value="300"/>
+      <div style="font-size:.58rem;color:#94a3b8;margin-bottom:5px;background:#f8fafc;border-radius:6px;padding:4px 8px;border:1px solid #e2e8f0;">Med Tests: <strong style="color:#475569">$300 included</strong> as fixed cost</div>
+      <div class="fg"><label>Completion Bonus</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-bonus" value="0" step="1" oninput="calc()" placeholder="0"/></div></div>
+      <div class="fg"><label>Other One-Time Reimb.</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-otherReimb" value="0" step="1" oninput="calc()" placeholder="0"/></div></div>
+      <div class="row2"><div class="fg"><label>Insurance</label><select id="i-medInsType" onchange="calc()"><option value="No">None</option><option value="Monthly">Monthly</option><option value="Project" selected>Project</option></select></div><div class="fg"><label>Amount</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-medInsAmt" value="0" step="1" oninput="calc()"/></div></div></div>
+      <div class="tg"><span class="tg-l">Vivian Hire?</span><div class="tg-sw"><button id="b-vivian-y" onclick="tog('vivian','Y')">Y</button><button id="b-vivian-n" class="off" onclick="tog('vivian','N')">N</button></div></div>
+    </div>
+
+    <div id="cal-pkg" style="display:none">
+      <div class="section-head">Stipend</div>
+      <div class="fg"><label>Stipend (Hourly) <span class="dot"></span></label><div class="iw"><span class="pfx">$</span><input type="number" class="hp rq" id="i-calStipend" value="51" step="0.01" oninput="calc()"/></div></div>
+      <div class="section-head">One-Time &amp; Benefits</div>
+      <input type="hidden" id="i-calMedTests" value="300"/>
+      <div style="font-size:.58rem;color:#94a3b8;margin-bottom:5px;background:#f8fafc;border-radius:6px;padding:4px 8px;border:1px solid #e2e8f0;">Med Tests: <strong style="color:#475569">$300 included</strong> as fixed cost</div>
+      <div class="fg"><label>Completion Bonus</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-calBonus" value="0" step="1" oninput="calc()" placeholder="0"/></div></div>
+      <div class="fg"><label>Other One-Time Reimb.</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-calOtherReimb" value="0" step="1" oninput="calc()" placeholder="0"/></div></div>
+      <div class="row2"><div class="fg"><label>Insurance</label><select id="i-calMedInsType" onchange="calc()"><option value="No" selected>None</option><option value="Monthly">Monthly</option><option value="Project">Project</option></select></div><div class="fg"><label>Amount</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-calMedInsAmt" value="250" step="1" oninput="calc()"/></div></div></div>
+      <div class="tg"><span class="tg-l">Vivian Hire?</span><div class="tg-sw"><button id="b-calVivian-y" class="on" onclick="tog('calVivian','Y')">Y</button><button id="b-calVivian-n" onclick="tog('calVivian','N')">N</button></div></div>
+    </div>
+
+    <div id="ogs-pkg" style="display:none">
+      <div class="section-head">Travel Allowances (Daily)</div>
+      <div class="row2"><div class="fg"><label>Housing /day <span class="dot"></span></label><div class="iw"><span class="pfx">$</span><input type="number" class="hp rq" id="i-housing" value="113" step="0.01" oninput="calc()"/></div></div><div class="fg"><label>Meals /day <span class="dot"></span></label><div class="iw"><span class="pfx">$</span><input type="number" class="hp rq" id="i-meals" value="74" step="0.01" oninput="calc()"/></div></div></div>
+      <div class="section-head">One-Time</div>
+      <div class="row2"><div class="fg"><label>Flight/Completion</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-flight" value="0" step="1" oninput="calc()"/></div></div><div class="fg"><label>Med Tests</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-ogsMedTests" value="0" step="1" oninput="calc()"/></div></div></div>
+      <div class="section-head">Auto-Calculated</div>
+      <div class="auto-tile"><span class="auto-tile-l">PTO (4.65%)</span><span class="auto-tile-v">$<span id="o-pto">—</span>/hr</span></div>
+      <div class="auto-tile"><span class="auto-tile-l">W-2 Net</span><span class="auto-tile-v">$<span id="o-w2net">—</span>/hr</span></div>
+      <div class="auto-tile"><span class="auto-tile-l">Vivian Fee</span><span class="auto-tile-v">$<span id="o-viv">—</span>/hr</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL 3: RESULTS -->
+<div class="panel panel-results">
+  <div class="panel-head">
+    <div class="panel-title-ico">📊</div>
+    <div class="panel-title-wrap">
+      <span class="panel-title">Live Results</span>
+      <span class="panel-sub">Updates as you type</span>
+    </div>
+  </div>
+  <div class="results-body" id="results-area"></div>
+</div>
+
+<!-- GUIDE -->
+<div class="alt-view guide">
+<div class="guide"><div class="guide-inner">
+<div class="g-title">How to Use This Calculator</div>
+<div class="g-sub">A complete guide for new recruiters. Read this once and you will understand exactly how nurse staffing economics work and how to use every part of this tool.</div>
+
+<div class="g-section">
+<div class="g-h">Layout Overview</div>
+<div class="g-p">The calculator uses a <strong>two-column layout</strong>. The left panel holds all your inputs — bill rate, hours, W2, stipend, toggles. The right panel shows results that <strong>update instantly</strong> as you type. There are no "Calculate" buttons — everything is live.</div>
+<div class="g-grid">
+<div class="g-card"><div class="g-icon">💰</div><div class="g-card-t">Left Panel — Inputs</div><div class="g-card-d">Billing section first (bill rate, MSP fee, hours, weeks, client picker), then Nurse Package (W-2, stipend, benefits, toggles). Scroll to see all fields.</div></div>
+<div class="g-card"><div class="g-icon">📊</div><div class="g-card-t">Right Panel — Results</div><div class="g-card-d">Hourly profit margin (green or red), project billing total, blended rate, hourly breakdown, and weekly breakdown. Live-updates as you change inputs.</div></div>
+<div class="g-card"><div class="g-icon">🧮</div><div class="g-card-t">Top Tabs — Mode</div><div class="g-card-d">Switch between Standard, California OT, and OGS Nurse calculation modes. Each has different formulas and field requirements.</div></div>
+<div class="g-card"><div class="g-icon">🕒</div><div class="g-card-t">History (Auto-Saved)</div><div class="g-card-d">Every calculation is automatically saved for 7 days. Click the History tab to review past packages and reload any one back into the calculator.</div></div>
+</div>
+</div>
+
+<div class="g-section">
+<div class="g-h">The Foundation — Bill Rate Driven Accounts</div>
+<div class="g-p">Every deal starts with one number: the <strong>bill rate</strong>. This is the hourly amount a hospital pays HonorVet for placing a nurse. From that single number, you decide how much to pay the nurse and what's left as profit. The math runs in this order:</div>
+<table class="g-table">
+<tr><th>Step</th><th>Calculation</th><th>Example</th></tr>
+<tr><td>Bill rate</td><td>What the hospital pays</td><td class="m">$85.00/hr</td></tr>
+<tr><td>MSP fee taken</td><td>Staffing marketplace cut (3-7%)</td><td class="m">−$5.53 (6.5%)</td></tr>
+<tr><td>Net bill rate</td><td>What HonorVet keeps after MSP</td><td class="m">$79.48/hr</td></tr>
+<tr><td>Pay the nurse</td><td>W2 + overhead + stipend</td><td class="m">−$61.41/hr</td></tr>
+<tr class="win"><td><strong>Profit margin</strong></td><td><strong>What remains</strong></td><td class="m"><strong>$18.06/hr</strong></td></tr>
+</table>
+</div>
+
+<div class="g-section">
+<div class="g-h">Why W2 + Per Diem? (The Core Concept)</div>
+<div class="g-p">There are two ways to pay a nurse, and the difference matters enormously. <strong>W2 Only</strong> means the entire compensation is taxable wages. <strong>W2 + Per Diem</strong> means a smaller W2 wage plus a non-taxable stipend for housing, meals, and incidentals. The W2 + Per Diem model is better for everyone — here's why:</div>
+<table class="g-table">
+<tr><th>Cost Component</th><th>W2 Only</th><th>W2 + Per Diem</th></tr>
+<tr><td>W2 Compensation</td><td class="m">$54.81/hr</td><td class="m">$20.00/hr</td></tr>
+<tr><td>Overhead % (only on W2)</td><td class="m">25%</td><td class="m">33%</td></tr>
+<tr><td>Overhead in Dollars</td><td class="m">$13.70</td><td class="m">$6.60</td></tr>
+<tr><td>Per Diem (Non-Taxable)</td><td class="m">$0.00</td><td class="m">$34.81</td></tr>
+<tr><td>Total Cost to Company</td><td class="m">$68.51</td><td class="m">$61.41</td></tr>
+<tr class="win"><td><strong>Gross Profit/hr</strong></td><td class="m"><strong>$10.96</strong></td><td class="m"><strong>$18.06</strong></td></tr>
+</table>
+<div class="g-callout"><strong>Why this works:</strong> Overhead (payroll taxes, insurance, workers comp) only applies to the W2 portion. Even though the overhead percentage is higher (33% vs 25%), 33% of $20 is far less than 25% of $54. The stipend portion passes through with zero overhead. <strong>The nurse also wins</strong> — they take home about $10/hr more because the stipend is never taxed.</div>
+</div>
+
+<div class="g-section">
+<div class="g-h">Loading Factor (Overhead)</div>
+<div class="g-p">The loading factor represents the real cost of employing someone beyond their W2 wage. It includes payroll taxes (Social Security, Medicare, FUTA, SUTA), workers compensation insurance, general liability insurance, health/dental/vision benefits, and 401K matching.</div>
+<table class="g-table">
+<tr><th>W2 Rate</th><th>Loading Factor</th><th>What It Means</th></tr>
+<tr><td>Below $30/hr</td><td class="m">1.33 (33% overhead)</td><td>Every $1 of W2 costs the company $1.33</td></tr>
+<tr><td>$30/hr and above</td><td class="m">1.25 (25% overhead)</td><td>Every $1 of W2 costs the company $1.25</td></tr>
+</table>
+</div>
+
+<div class="g-section">
+<div class="g-h">Which Tab Should I Use?</div>
+<div class="g-p"><strong>Standard (Non-CA):</strong> Use for all states except California. This is the most common tab. Supports toggling stipend on/off for OT hours and orientation hours. Allows a separate OT stipend rate.</div>
+<div class="g-p"><strong>California OT:</strong> California has unique overtime laws. Stipend automatically applies to all hours — there is no toggle. The Vivian fee formula differs slightly (includes OT hours in the denominator).</div>
+<div class="g-p"><strong>OGS Nurse:</strong> For OGS government contracts. Housing and meals are entered as daily amounts. PTO automatically calculated at 4.65% of W2. Fixed 1.25 loading factor. Vivian fee always included.</div>
+</div>
+
+<div class="g-section">
+<div class="g-h">Tips for New Recruiters</div>
+<div class="g-tips">
+<div class="g-tip"><strong>Check the margin first.</strong> Above $10/hr is healthy. $5-10/hr is thin but workable. Below $5/hr is risky.</div>
+<div class="g-tip"><strong>Keep W-2 low.</strong> $13-$20/hr is typical. Lower W2 means less overhead and more margin.</div>
+<div class="g-tip"><strong>Orange fields are required</strong> for every deal. Gray fields are pre-filled defaults.</div>
+<div class="g-tip"><strong>Vivian adds $2-3/hr cost.</strong> Direct sourcing saves that amount of margin.</div>
+<div class="g-tip"><strong>Present Weekly Gross</strong> to the nurse. That's the number they care about most.</div>
+<div class="g-tip"><strong>Use History tab</strong> to compare similar past packages and stay consistent.</div>
+</div>
+<div class="g-warn"><strong>If margin turns red, the deal loses money on every hour worked.</strong> Either reduce the nurse package, negotiate a higher bill rate, or walk away from the deal.</div>
+</div>
+
+</div></div>
+</div>
+
+<!-- HISTORY -->
+<div class="alt-view history">
+<div class="history"><div class="h-inner">
+<div class="h-head"><div class="h-title">Recent Packages</div><button class="h-clear" onclick="clearHist()">Clear All</button></div>
+<div class="h-sub">Calculations from the last 7 days are saved automatically. Click any entry to expand details, then load it back into the calculator.</div>
+<div id="hist-list"></div>
+</div></div>
+</div>
+
+</div>
+
+<div class="ft">HonorVet Technologies · <b>Internal Use Only</b> · v3.0</div>
+
+<script>
+const CL=[{n:'Aya Healthcare',f:.05},{n:'CHOP',f:.03},{n:'Corecivic',f:.065},{n:'Albany Medical',f:.07},{n:'Hoag',f:.065},{n:'KPC',f:.065},{n:'NYCHH',f:.07},{n:'UHS',f:.04},{n:'Kaiser-AMN',f:.05},{n:'Mount Sinai',f:.07},{n:'THR',f:.065},{n:'Henry Ford',f:.05},{n:'HWL NY',f:.05}];
+const S={stip:'Y',stipOT:'Y',stipOrient:'N',vivian:'N',calVivian:'Y'};
+let mode='nc',lastResult=null,saveTimer=null,lastSavedHash=null;
+
+const HK='honorvet_hist_v3';
+function loadHist(){try{const raw=localStorage.getItem(HK);if(!raw)return[];const arr=JSON.parse(raw);const cutoff=Date.now()-7*86400*1000;return arr.filter(e=>e.ts>cutoff).sort((a,b)=>b.ts-a.ts)}catch(e){return[]}}
+function saveHist(arr){try{localStorage.setItem(HK,JSON.stringify(arr))}catch(e){}}
+function addToHist(snap){const arr=loadHist();arr.unshift(snap);if(arr.length>50)arr.length=50;saveHist(arr)}
+function clearHist(){if(confirm('Clear all saved packages?')){localStorage.removeItem(HK);renderHist()}}
+
+const sel=document.getElementById('i-client');
+CL.forEach((c,i)=>{const o=document.createElement('option');o.value=i;o.textContent=c.n+' — '+(c.f*100).toFixed(1)+'%';sel.appendChild(o)});
+
+function pickClient(){const v=sel.value;if(v!==''){document.getElementById('i-mspFee').value=(CL[+v].f*100).toFixed(2);document.getElementById('i-manualFee').value=''}calc()}
+
+function setMode(m){
+  if(m==='guide'){document.body.classList.add('guide-mode');document.body.classList.remove('history-mode');setActiveTab('tab-guide');document.getElementById('warn-std').classList.remove('show');document.getElementById('warn-cal').classList.remove('show');return}
+  if(m==='history'){document.body.classList.add('history-mode');document.body.classList.remove('guide-mode');setActiveTab('tab-history');renderHist();document.getElementById('warn-std').classList.remove('show');document.getElementById('warn-cal').classList.remove('show');return}
+  document.body.classList.remove('guide-mode','history-mode');
+  mode=m;setActiveTab('tab-'+m);
+  document.getElementById('mode-label').textContent=m==='cal'?'California OT':m==='ogs'?'OGS Nurse':'Standard';
+  document.getElementById('warn-std').classList.toggle('show',m==='nc');
+  document.getElementById('warn-cal').classList.toggle('show',m==='cal');
+  document.getElementById('nc-pkg').style.display=m==='nc'?'':'none';
+  document.getElementById('cal-pkg').style.display=m==='cal'?'':'none';
+  document.getElementById('ogs-pkg').style.display=m==='ogs'?'':'none';
+  calc();
+}
+function setActiveTab(id){document.querySelectorAll('.top-tab').forEach(t=>t.classList.remove('on'));document.getElementById(id).classList.add('on')}
+
+function tog(k,v){
+  S[k]=v;
+  const Y=document.getElementById('b-'+k+'-y'),N=document.getElementById('b-'+k+'-n');
+  if(Y)Y.className=v==='Y'?'on':'';
+  if(N)N.className=v==='N'?'off':'';
+  if(k==='stip'){document.getElementById('stip-fields').style.display=v==='Y'?'':'none'}
+  if(k==='stipOT'){document.getElementById('ot-stip-row').style.display=v==='Y'?'':'none'}
+  calc();
+}
+
+const V=id=>{const e=document.getElementById(id);return e?+(e.value)||0:0};
+const F=(n,d=2)=>!isFinite(n)?'—':n.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const D=n=>'$'+F(n);
+
+
+const GSA_RATES = {
+  // ── Standard CONUS (default for all unlisted ZIPs) ──
+  "DEFAULT": {city:"Standard CONUS",state:"",lodging:107,meals:68},
+
+  // ── Alabama ──
+  "350":["Birmingham","AL",132,74],"351":["Birmingham","AL",132,74],
+  "364":["Mobile","AL",114,74],
+
+  // ── Alaska ──
+  "995":["Anchorage","AK",192,100],"996":["Anchorage","AK",192,100],
+  "997":["Fairbanks","AK",134,100],"998":["Juneau","AK",188,100],
+  "999":["Ketchikan","AK",131,100],
+
+  // ── Arizona ──
+  "850":["Phoenix","AZ",130,68],"851":["Phoenix","AZ",130,68],
+  "852":["Phoenix","AZ",130,68],"853":["Phoenix","AZ",130,68],
+  "855":["Tucson","AZ",114,68],"857":["Tucson","AZ",114,68],
+  "863":["Flagstaff","AZ",127,68],"864":["Flagstaff","AZ",127,68],
+  "865":["Sedona","AZ",188,68],
+
+  // ── Arkansas ──
+  "722":["Little Rock","AR",107,68],
+
+  // ── California ──
+  "900":["Los Angeles","CA",182,100],"901":["Los Angeles","CA",182,100],
+  "902":["Los Angeles","CA",182,100],"903":["Los Angeles","CA",182,100],
+  "904":["Los Angeles","CA",182,100],"905":["Los Angeles","CA",182,100],
+  "906":["Los Angeles","CA",182,100],"907":["Los Angeles","CA",182,100],
+  "908":["Los Angeles","CA",182,100],"910":["Los Angeles","CA",182,100],
+  "911":["Los Angeles","CA",182,100],"912":["Los Angeles","CA",182,100],
+  "913":["Los Angeles","CA",182,100],"914":["Los Angeles","CA",182,100],
+  "915":["Los Angeles","CA",182,100],"916":["Los Angeles","CA",182,100],
+  "917":["Los Angeles","CA",182,100],"918":["Los Angeles","CA",182,100],
+  "919":["San Diego","CA",160,100],"920":["San Diego","CA",160,100],
+  "921":["San Diego","CA",160,100],"922":["San Diego","CA",160,100],
+  "923":["San Diego","CA",160,100],"924":["San Diego","CA",160,100],
+  "925":["Riverside","CA",119,100],"926":["Orange County","CA",176,100],
+  "927":["Orange County","CA",176,100],"928":["Orange County","CA",176,100],
+  "930":["Ventura","CA",145,100],"931":["Ventura","CA",145,100],
+  "932":["Bakersfield","CA",107,100],"933":["Bakersfield","CA",107,100],
+  "934":["Santa Barbara","CA",225,100],"935":["Santa Barbara","CA",225,100],
+  "936":["Fresno","CA",107,100],"937":["Fresno","CA",107,100],
+  "939":["Salinas","CA",163,100],"940":["San Francisco","CA",295,100],
+  "941":["San Francisco","CA",295,100],"943":["San Jose","CA",195,100],
+  "944":["San Jose","CA",195,100],"945":["Oakland","CA",210,100],
+  "946":["Oakland","CA",210,100],"947":["Berkeley","CA",210,100],
+  "948":["Richmond","CA",210,100],"949":["Marin County","CA",250,100],
+  "950":["San Jose","CA",195,100],"951":["San Jose","CA",195,100],
+  "952":["Stockton","CA",107,100],"953":["Modesto","CA",107,100],
+  "954":["Sacramento","CA",149,100],"955":["Sacramento","CA",149,100],
+  "956":["Sacramento","CA",149,100],"957":["Sacramento","CA",149,100],
+  "958":["Sacramento","CA",149,100],"959":["Redding","CA",107,100],
+  "960":["Eureka","CA",107,100],"961":["Reno area","NV",107,100],
+  "962":["Santa Cruz","CA",207,100],"967":["Napa","CA",275,100],
+  "968":["Santa Rosa","CA",170,100],
+
+  // ── Colorado ──
+  "800":["Denver","CO",180,79],"801":["Denver","CO",180,79],
+  "802":["Denver","CO",180,79],"803":["Denver","CO",180,79],
+  "804":["Denver","CO",180,79],"805":["Denver","CO",180,79],
+  "806":["Colorado Springs","CO",114,79],
+  "807":["Colorado Springs","CO",114,79],
+  "808":["Pueblo","CO",107,79],
+  "809":["Colorado Springs","CO",114,79],
+  "810":["Grand Junction","CO",107,79],
+  "811":["Alamosa","CO",107,79],
+  "812":["Durango","CO",138,79],
+  "813":["Durango","CO",138,79],
+  "814":["Grand Junction","CO",107,79],
+  "815":["Steamboat Springs","CO",152,79],
+  "816":["Glenwood Springs","CO",172,79],
+
+  // ── Connecticut ──
+  "060":["Hartford","CT",147,79],"061":["Hartford","CT",147,79],
+  "062":["Hartford","CT",147,79],"063":["New Haven","CT",150,79],
+  "064":["New Haven","CT",150,79],"065":["New Haven","CT",150,79],
+  "066":["Stamford","CT",226,79],"067":["Stamford","CT",226,79],
+  "068":["Stamford","CT",226,79],"069":["Stamford","CT",226,79],
+
+  // ── DC ──
+  "200":["Washington DC","DC",258,79],"201":["Washington DC","DC",258,79],
+  "202":["Washington DC","DC",258,79],"203":["Washington DC","DC",258,79],
+  "204":["Washington DC","DC",258,79],"205":["Washington DC","DC",258,79],
+
+  // ── Delaware ──
+  "197":["Wilmington","DE",140,79],"198":["Wilmington","DE",140,79],
+  "199":["Wilmington","DE",140,79],
+
+  // ── Florida ──
+  "320":["Jacksonville","FL",113,79],"321":["Daytona Beach","FL",116,79],
+  "322":["Jacksonville","FL",113,79],"323":["Tallahassee","FL",107,79],
+  "324":["Tallahassee","FL",107,79],"325":["Tallahassee","FL",107,79],
+  "326":["Gainesville","FL",107,79],"327":["Orlando","FL",149,79],
+  "328":["Orlando","FL",149,79],"329":["Orlando","FL",149,79],
+  "330":["Miami","FL",219,79],"331":["Miami","FL",219,79],
+  "332":["Miami","FL",219,79],"333":["Fort Lauderdale","FL",189,79],
+  "334":["Fort Lauderdale","FL",189,79],"335":["Tampa","FL",139,79],
+  "336":["Tampa","FL",139,79],"337":["Tampa","FL",139,79],
+  "338":["Tampa","FL",139,79],"339":["Fort Myers","FL",163,79],
+  "341":["Naples","FL",193,79],"342":["Sarasota","FL",153,79],
+  "344":["Pensacola","FL",107,79],"346":["Tampa","FL",139,79],
+  "347":["Orlando","FL",149,79],"349":["Fort Lauderdale","FL",189,79],
+
+  // ── Georgia ──
+  "300":["Atlanta","GA",159,79],"301":["Atlanta","GA",159,79],
+  "302":["Atlanta","GA",159,79],"303":["Atlanta","GA",159,79],
+  "304":["Atlanta","GA",159,79],"305":["Atlanta","GA",159,79],
+  "306":["Atlanta","GA",159,79],"307":["Chatanooga area","GA",107,79],
+  "308":["Augusta","GA",107,79],"309":["Augusta","GA",107,79],
+  "310":["Macon","GA",107,79],"311":["Macon","GA",107,79],
+  "312":["Macon","GA",107,79],"313":["Savannah","GA",135,79],
+  "314":["Savannah","GA",135,79],"315":["Savannah","GA",135,79],
+
+  // ── Hawaii ──
+  "967":["Honolulu","HI",289,142],"968":["Honolulu","HI",289,142],
+
+  // ── Idaho ──
+  "832":["Boise","ID",114,79],"833":["Boise","ID",114,79],
+  "834":["Boise","ID",114,79],"836":["Boise","ID",114,79],
+  "837":["Boise","ID",114,79],
+
+  // ── Illinois ──
+  "600":["Chicago","IL",233,84],"601":["Chicago","IL",233,84],
+  "602":["Chicago","IL",233,84],"603":["Chicago","IL",233,84],
+  "604":["Chicago","IL",233,84],"605":["Chicago","IL",233,84],
+  "606":["Chicago","IL",233,84],"607":["Chicago","IL",233,84],
+  "608":["Chicago","IL",233,84],"609":["Chicago","IL",233,84],
+  "610":["Rockford","IL",107,84],"611":["Rockford","IL",107,84],
+  "616":["Peoria","IL",107,84],"617":["Peoria","IL",107,84],
+  "618":["Champaign","IL",107,84],"619":["Champaign","IL",107,84],
+  "620":["Springfield","IL",107,84],"621":["Springfield","IL",107,84],
+  "622":["Springfield","IL",107,84],"623":["Springfield","IL",107,84],
+  "625":["Springfield","IL",107,84],"626":["Springfield","IL",107,84],
+
+  // ── Indiana ──
+  "460":["Indianapolis","IN",107,79],"461":["Indianapolis","IN",107,79],
+  "462":["Indianapolis","IN",107,79],"463":["Indianapolis","IN",107,79],
+  "464":["Gary","IN",107,79],"465":["Gary","IN",107,79],
+  "466":["Fort Wayne","IN",107,79],"467":["Fort Wayne","IN",107,79],
+
+  // ── Iowa ──
+  "500":["Des Moines","IA",107,79],"501":["Des Moines","IA",107,79],
+  "502":["Des Moines","IA",107,79],
+
+  // ── Kansas ──
+  "660":["Kansas City","KS",127,79],"661":["Kansas City","KS",127,79],
+  "662":["Kansas City","KS",127,79],
+
+  // ── Kentucky ──
+  "400":["Louisville","KY",107,79],"401":["Louisville","KY",107,79],
+  "402":["Louisville","KY",107,79],"403":["Lexington","KY",107,79],
+  "404":["Lexington","KY",107,79],"405":["Lexington","KY",107,79],
+
+  // ── Louisiana ──
+  "700":["New Orleans","LA",168,84],"701":["New Orleans","LA",168,84],
+  "703":["New Orleans","LA",168,84],"704":["New Orleans","LA",168,84],
+  "705":["New Orleans","LA",168,84],"706":["New Orleans","LA",168,84],
+  "707":["Baton Rouge","LA",107,84],"708":["Baton Rouge","LA",107,84],
+
+  // ── Maine ──
+  "040":["Portland","ME",129,79],"041":["Portland","ME",129,79],
+  "042":["Portland","ME",129,79],"043":["Augusta","ME",107,79],
+  "044":["Bangor","ME",107,79],"045":["Bath","ME",107,79],
+  "046":["Rockland","ME",107,79],"047":["Kennebunk","ME",200,79],
+  "048":["Kennebunk","ME",200,79],"049":["Kennebunk","ME",200,79],
+
+  // ── Maryland ──
+  "206":["Suburban MD","MD",203,79],"207":["Suburban MD","MD",203,79],
+  "208":["Suburban MD","MD",203,79],"209":["Suburban MD","MD",203,79],
+  "210":["Baltimore","MD",152,79],"211":["Baltimore","MD",152,79],
+  "212":["Baltimore","MD",152,79],"214":["Baltimore","MD",152,79],
+  "215":["Cumberland","MD",107,79],"216":["Annapolis","MD",152,79],
+  "217":["Annapolis","MD",152,79],"218":["Salisbury","MD",107,79],
+  "219":["Ocean City","MD",172,79],
+
+  // ── Massachusetts ──
+  "010":["Springfield","MA",130,79],"011":["Springfield","MA",130,79],
+  "012":["Pittsfield","MA",130,79],"013":["Springfield","MA",130,79],
+  "014":["Worcester","MA",107,79],"015":["Worcester","MA",107,79],
+  "016":["Worcester","MA",107,79],"017":["Worcester","MA",107,79],
+  "018":["Boston","MA",278,79],"019":["Boston","MA",278,79],
+  "020":["Boston","MA",278,79],"021":["Boston","MA",278,79],
+  "022":["Boston","MA",278,79],"023":["Boston","MA",278,79],
+  "024":["Boston","MA",278,79],"025":["Nantucket","MA",383,79],
+  "026":["Cape Cod","MA",225,79],"027":["Cape Cod","MA",225,79],
+
+  // ── Michigan ──
+  "480":["Detroit","MI",120,79],"481":["Detroit","MI",120,79],
+  "482":["Detroit","MI",120,79],"483":["Detroit","MI",120,79],
+  "484":["Flint","MI",107,79],"485":["Flint","MI",107,79],
+  "486":["Saginaw","MI",107,79],"487":["Saginaw","MI",107,79],
+  "488":["Lansing","MI",107,79],"489":["Lansing","MI",107,79],
+  "490":["Kalamazoo","MI",107,79],"491":["Kalamazoo","MI",107,79],
+  "492":["Grand Rapids","MI",120,79],"493":["Grand Rapids","MI",120,79],
+  "494":["Grand Rapids","MI",120,79],"495":["Grand Rapids","MI",120,79],
+  "496":["Traverse City","MI",107,79],"497":["Traverse City","MI",107,79],
+  "498":["Marquette","MI",107,79],"499":["Marquette","MI",107,79],
+
+  // ── Minnesota ──
+  "550":["Minneapolis","MN",139,84],"551":["Minneapolis","MN",139,84],
+  "553":["Minneapolis","MN",139,84],"554":["Minneapolis","MN",139,84],
+  "555":["Minneapolis","MN",139,84],"556":["Duluth","MN",107,84],
+  "557":["Duluth","MN",107,84],"558":["Duluth","MN",107,84],
+  "559":["Rochester","MN",107,84],"560":["Rochester","MN",107,84],
+
+  // ── Missouri ──
+  "630":["St. Louis","MO",129,79],"631":["St. Louis","MO",129,79],
+  "633":["St. Louis","MO",129,79],"634":["St. Louis","MO",129,79],
+  "640":["Kansas City","MO",127,79],"641":["Kansas City","MO",127,79],
+  "644":["Kansas City","MO",127,79],"645":["Kansas City","MO",127,79],
+  "646":["Kansas City","MO",127,79],"647":["Kansas City","MO",127,79],
+  "648":["Kansas City","MO",127,79],
+
+  // ── Montana ──
+  "590":["Billings","MT",107,79],"591":["Billings","MT",107,79],
+  "592":["Great Falls","MT",107,79],"593":["Missoula","MT",107,79],
+  "594":["Great Falls","MT",107,79],"595":["Helena","MT",107,79],
+  "596":["Bozeman","MT",148,79],"597":["Bozeman","MT",148,79],
+  "598":["Missoula","MT",107,79],"599":["Missoula","MT",107,79],
+
+  // ── Nebraska ──
+  "680":["Omaha","NE",107,79],"681":["Omaha","NE",107,79],
+  "682":["Lincoln","NE",107,79],"683":["Lincoln","NE",107,79],
+  "684":["Lincoln","NE",107,79],"685":["Lincoln","NE",107,79],
+
+  // ── Nevada ──
+  "889":["Las Vegas","NV",140,79],"890":["Las Vegas","NV",140,79],
+  "891":["Las Vegas","NV",140,79],"893":["Las Vegas","NV",140,79],
+  "894":["Reno","NV",107,79],"895":["Reno","NV",107,79],
+  "897":["Carson City","NV",107,79],"898":["Carson City","NV",107,79],
+
+  // ── New Hampshire ──
+  "030":["Manchester","NH",107,79],"031":["Manchester","NH",107,79],
+  "032":["Manchester","NH",107,79],"033":["Concord","NH",107,79],
+  "034":["Keene","NH",107,79],"035":["Littleton","NH",107,79],
+  "036":["Laconia","NH",107,79],"037":["Laconia","NH",107,79],
+  "038":["Portsmouth","NH",147,79],"039":["Portsmouth","NH",147,79],
+
+  // ── New Jersey ──
+  "070":["Newark","NJ",193,84],"071":["Newark","NJ",193,84],
+  "072":["Newark","NJ",193,84],"073":["Newark","NJ",193,84],
+  "074":["Paterson","NJ",193,84],"075":["Paterson","NJ",193,84],
+  "076":["Hackensack","NJ",193,84],"077":["Long Branch","NJ",175,84],
+  "078":["Long Branch","NJ",175,84],"079":["Long Branch","NJ",175,84],
+  "080":["Trenton","NJ",140,84],"081":["Trenton","NJ",140,84],
+  "082":["Atlantic City","NJ",131,84],"083":["Atlantic City","NJ",131,84],
+  "084":["Vineland","NJ",107,84],"085":["New Brunswick","NJ",173,84],
+  "086":["New Brunswick","NJ",173,84],"087":["New Brunswick","NJ",173,84],
+  "088":["New Brunswick","NJ",173,84],"089":["New Brunswick","NJ",173,84],
+
+  // ── New Mexico ──
+  "870":["Albuquerque","NM",107,79],"871":["Albuquerque","NM",107,79],
+  "872":["Albuquerque","NM",107,79],"873":["Albuquerque","NM",107,79],
+  "874":["Albuquerque","NM",107,79],"875":["Albuquerque","NM",107,79],
+  "877":["Santa Fe","NM",153,79],"878":["Santa Fe","NM",153,79],
+  "879":["Santa Fe","NM",153,79],"880":["Las Cruces","NM",107,79],
+  "881":["Las Cruces","NM",107,79],"882":["Las Cruces","NM",107,79],
+  "883":["Alamogordo","NM",107,79],"884":["Taos","NM",153,79],
+
+  // ── New York ──
+  "100":["New York City","NY",313,100],"101":["New York City","NY",313,100],
+  "102":["New York City","NY",313,100],"103":["Staten Island","NY",313,100],
+  "104":["Bronx","NY",313,100],"105":["White Plains","NY",178,100],
+  "106":["White Plains","NY",178,100],"107":["White Plains","NY",178,100],
+  "108":["White Plains","NY",178,100],"109":["White Plains","NY",178,100],
+  "110":["Queens","NY",313,100],"111":["Queens","NY",313,100],
+  "112":["Brooklyn","NY",313,100],"113":["Queens","NY",313,100],
+  "114":["Queens","NY",313,100],"115":["Queens","NY",313,100],
+  "116":["Queens","NY",313,100],"117":["Long Island","NY",199,100],
+  "118":["Long Island","NY",199,100],"119":["Long Island","NY",199,100],
+  "120":["Albany","NY",135,100],"121":["Albany","NY",135,100],
+  "122":["Albany","NY",135,100],"123":["Albany","NY",135,100],
+  "124":["Poughkeepsie","NY",152,100],"125":["Poughkeepsie","NY",152,100],
+  "126":["Poughkeepsie","NY",152,100],"127":["Poughkeepsie","NY",152,100],
+  "128":["Glens Falls","NY",107,100],"129":["Plattsburgh","NY",107,100],
+  "130":["Syracuse","NY",107,100],"131":["Syracuse","NY",107,100],
+  "132":["Syracuse","NY",107,100],"133":["Utica","NY",107,100],
+  "134":["Utica","NY",107,100],"135":["Utica","NY",107,100],
+  "136":["Watertown","NY",107,100],"137":["Binghamton","NY",107,100],
+  "138":["Binghamton","NY",107,100],"139":["Binghamton","NY",107,100],
+  "140":["Buffalo","NY",107,100],"141":["Buffalo","NY",107,100],
+  "142":["Buffalo","NY",107,100],"143":["Niagara Falls","NY",107,100],
+  "144":["Rochester","NY",107,100],"145":["Rochester","NY",107,100],
+  "146":["Rochester","NY",107,100],"147":["Corning","NY",107,100],
+  "148":["Ithaca","NY",107,100],"149":["Elmira","NY",107,100],
+
+  // ── North Carolina ──
+  "270":["Greensboro","NC",107,79],"271":["Greensboro","NC",107,79],
+  "272":["Greensboro","NC",107,79],"273":["Greensboro","NC",107,79],
+  "274":["Winston-Salem","NC",107,79],"275":["Raleigh","NC",137,79],
+  "276":["Raleigh","NC",137,79],"277":["Durham","NC",137,79],
+  "278":["Rocky Mount","NC",107,79],"279":["Rocky Mount","NC",107,79],
+  "280":["Charlotte","NC",142,79],"281":["Charlotte","NC",142,79],
+  "282":["Charlotte","NC",142,79],"283":["Charlotte","NC",142,79],
+  "284":["Wilmington","NC",107,79],"285":["Greenville","NC",107,79],
+  "286":["Asheville","NC",153,79],"287":["Asheville","NC",153,79],
+  "288":["Asheville","NC",153,79],"289":["Asheville","NC",153,79],
+
+  // ── Ohio ──
+  "430":["Columbus","OH",116,79],"431":["Columbus","OH",116,79],
+  "432":["Columbus","OH",116,79],"433":["Columbus","OH",116,79],
+  "434":["Toledo","OH",107,79],"435":["Toledo","OH",107,79],
+  "436":["Toledo","OH",107,79],"437":["Zanesville","OH",107,79],
+  "438":["Zanesville","OH",107,79],"439":["Cambridge","OH",107,79],
+  "440":["Cleveland","OH",127,79],"441":["Cleveland","OH",127,79],
+  "442":["Cleveland","OH",127,79],"443":["Akron","OH",107,79],
+  "444":["Youngstown","OH",107,79],"445":["Youngstown","OH",107,79],
+  "446":["Youngstown","OH",107,79],"447":["Canton","OH",107,79],
+  "448":["Mansfield","OH",107,79],"449":["Mansfield","OH",107,79],
+  "450":["Cincinnati","OH",121,79],"451":["Cincinnati","OH",121,79],
+  "452":["Cincinnati","OH",121,79],"453":["Dayton","OH",107,79],
+  "454":["Dayton","OH",107,79],"455":["Dayton","OH",107,79],
+  "456":["Chillicothe","OH",107,79],"457":["Athens","OH",107,79],
+  "458":["Lima","OH",107,79],
+
+  // ── Oklahoma ──
+  "730":["Oklahoma City","OK",107,79],"731":["Oklahoma City","OK",107,79],
+  "735":["Lawton","OK",107,79],"736":["Oklahoma City","OK",107,79],
+  "737":["Enid","OK",107,79],"738":["Woodward","OK",107,79],
+  "739":["Oklahoma City","OK",107,79],"740":["Tulsa","OK",107,79],
+  "741":["Tulsa","OK",107,79],"743":["Tulsa","OK",107,79],
+  "744":["Muskogee","OK",107,79],"745":["McAlester","OK",107,79],
+  "746":["Ponca City","OK",107,79],"747":["Durant","OK",107,79],
+  "748":["Ardmore","OK",107,79],
+
+  // ── Oregon ──
+  "970":["Portland","OR",163,79],"971":["Portland","OR",163,79],
+  "972":["Portland","OR",163,79],"973":["Portland","OR",163,79],
+  "974":["Salem","OR",107,79],"975":["Medford","OR",107,79],
+  "976":["Klamath Falls","OR",107,79],"977":["Bend","OR",149,79],
+  "978":["Bend","OR",149,79],"979":["Coos Bay","OR",107,79],
+
+  // ── Pennsylvania ──
+  "150":["Pittsburgh","PA",138,84],"151":["Pittsburgh","PA",138,84],
+  "152":["Pittsburgh","PA",138,84],"153":["Pittsburgh","PA",138,84],
+  "154":["Pittsburgh","PA",138,84],"155":["Pittsburgh","PA",138,84],
+  "156":["Pittsburgh","PA",138,84],"157":["Pittsburgh","PA",138,84],
+  "158":["Johnstown","PA",107,84],"159":["Johnstown","PA",107,84],
+  "160":["Butler","PA",107,84],"161":["New Castle","PA",107,84],
+  "162":["Kittanning","PA",107,84],"163":["Oil City","PA",107,84],
+  "164":["Erie","PA",107,84],"165":["Erie","PA",107,84],
+  "166":["Altoona","PA",107,84],"167":["Altoona","PA",107,84],
+  "168":["State College","PA",133,84],"169":["Williamsport","PA",107,84],
+  "170":["Harrisburg","PA",123,84],"171":["Harrisburg","PA",123,84],
+  "172":["Harrisburg","PA",123,84],"173":["York","PA",107,84],
+  "174":["York","PA",107,84],"175":["Lancaster","PA",107,84],
+  "176":["Lancaster","PA",107,84],"177":["Wilkes-Barre","PA",107,84],
+  "178":["Wilkes-Barre","PA",107,84],"179":["Wilkes-Barre","PA",107,84],
+  "180":["Allentown","PA",120,84],"181":["Allentown","PA",120,84],
+  "182":["Allentown","PA",120,84],"183":["Stroudsburg","PA",107,84],
+  "184":["Scranton","PA",107,84],"185":["Scranton","PA",107,84],
+  "186":["Hazleton","PA",107,84],"187":["Hazleton","PA",107,84],
+  "188":["Hazleton","PA",107,84],"189":["Hazleton","PA",107,84],
+  "190":["Philadelphia","PA",215,84],"191":["Philadelphia","PA",215,84],
+  "192":["Philadelphia","PA",215,84],"193":["Philadelphia","PA",215,84],
+  "194":["Philadelphia","PA",215,84],"195":["Philadelphia","PA",215,84],
+  "196":["Philadelphia","PA",215,84],
+
+  // ── Rhode Island ──
+  "028":["Providence","RI",148,79],"029":["Providence","RI",148,79],
+
+  // ── South Carolina ──
+  "290":["Columbia","SC",107,79],"291":["Columbia","SC",107,79],
+  "292":["Columbia","SC",107,79],"293":["Columbia","SC",107,79],
+  "294":["Charleston","SC",171,79],"295":["Florence","SC",107,79],
+  "296":["Greenville","SC",107,79],"297":["Greenville","SC",107,79],
+  "298":["Augusta area","SC",107,79],"299":["Hilton Head","SC",183,79],
+
+  // ── Tennessee ──
+  "370":["Nashville","TN",164,79],"371":["Nashville","TN",164,79],
+  "372":["Nashville","TN",164,79],"373":["Chattanooga","TN",107,79],
+  "374":["Chattanooga","TN",107,79],"376":["Chattanooga","TN",107,79],
+  "377":["Knoxville","TN",107,79],"378":["Knoxville","TN",107,79],
+  "379":["Knoxville","TN",107,79],"380":["Memphis","TN",122,79],
+  "381":["Memphis","TN",122,79],"382":["Memphis","TN",122,79],
+  "383":["Jackson","TN",107,79],"384":["Jackson","TN",107,79],
+  "385":["Jackson","TN",107,79],
+
+  // ── Texas ──
+  "750":["Dallas","TX",166,79],"751":["Dallas","TX",166,79],
+  "752":["Dallas","TX",166,79],"753":["Dallas","TX",166,79],
+  "754":["Dallas","TX",166,79],"755":["Dallas","TX",166,79],
+  "756":["Tyler","TX",107,79],"757":["Tyler","TX",107,79],
+  "758":["Wichita Falls","TX",107,79],"759":["Wichita Falls","TX",107,79],
+  "760":["Fort Worth","TX",166,79],"761":["Fort Worth","TX",166,79],
+  "762":["Fort Worth","TX",166,79],"763":["Wichita Falls","TX",107,79],
+  "764":["Waco","TX",107,79],"765":["Waco","TX",107,79],
+  "766":["Waco","TX",107,79],"767":["Waco","TX",107,79],
+  "768":["Abilene","TX",107,79],"769":["Midland","TX",107,79],
+  "770":["Houston","TX",206,79],"771":["Houston","TX",206,79],
+  "772":["Houston","TX",206,79],"773":["Houston","TX",206,79],
+  "774":["Houston","TX",206,79],"775":["Houston","TX",206,79],
+  "776":["Beaumont","TX",107,79],"777":["Beaumont","TX",107,79],
+  "778":["Bryan","TX",107,79],"779":["Victoria","TX",107,79],
+  "780":["San Antonio","TX",134,79],"781":["San Antonio","TX",134,79],
+  "782":["San Antonio","TX",134,79],"783":["San Antonio","TX",134,79],
+  "784":["Corpus Christi","TX",107,79],"785":["Corpus Christi","TX",107,79],
+  "786":["Austin","TX",189,79],"787":["Austin","TX",189,79],
+  "788":["Austin","TX",189,79],"789":["Fredericksburg","TX",107,79],
+  "790":["Amarillo","TX",107,79],"791":["Amarillo","TX",107,79],
+  "792":["Amarillo","TX",107,79],"793":["Lubbock","TX",107,79],
+  "794":["Lubbock","TX",107,79],"795":["Lubbock","TX",107,79],
+  "796":["Abilene","TX",107,79],"797":["Odessa","TX",107,79],
+  "798":["El Paso","TX",107,79],"799":["El Paso","TX",107,79],
+
+  // ── Utah ──
+  "840":["Salt Lake City","UT",131,79],"841":["Salt Lake City","UT",131,79],
+  "842":["Salt Lake City","UT",131,79],"843":["Ogden","UT",131,79],
+  "844":["Ogden","UT",131,79],"845":["Provo","UT",107,79],
+  "846":["Provo","UT",107,79],"847":["Provo","UT",107,79],
+
+  // ── Vermont ──
+  "050":["White River Jct","VT",107,79],"051":["White River Jct","VT",107,79],
+  "052":["Burlington","VT",145,79],"053":["Burlington","VT",145,79],
+  "054":["Burlington","VT",145,79],"056":["Montpelier","VT",107,79],
+  "057":["Montpelier","VT",107,79],"058":["St Johnsbury","VT",107,79],
+  "059":["St Johnsbury","VT",107,79],
+
+  // ── Virginia ──
+  "220":["Northern VA","VA",199,79],"221":["Northern VA","VA",199,79],
+  "222":["Northern VA","VA",199,79],"223":["Northern VA","VA",199,79],
+  "224":["Northern VA","VA",199,79],"225":["Northern VA","VA",199,79],
+  "226":["Winchester","VA",107,79],"227":["Culpeper","VA",107,79],
+  "228":["Harrisonburg","VA",107,79],"229":["Charlottesville","VA",148,79],
+  "230":["Richmond","VA",148,79],"231":["Richmond","VA",148,79],
+  "232":["Richmond","VA",148,79],"233":["Norfolk","VA",118,79],
+  "234":["Norfolk","VA",118,79],"235":["Norfolk","VA",118,79],
+  "236":["Norfolk","VA",118,79],"237":["Norfolk","VA",118,79],
+  "238":["Richmond","VA",148,79],"239":["Danville","VA",107,79],
+  "240":["Roanoke","VA",107,79],"241":["Roanoke","VA",107,79],
+  "242":["Bristol","VA",107,79],"243":["Blacksburg","VA",107,79],
+  "244":["Staunton","VA",107,79],"245":["Clifton Forge","VA",107,79],
+  "246":["Bluefield","VA",107,79],
+
+  // ── Washington ──
+  "980":["Seattle","WA",224,89],"981":["Seattle","WA",224,89],
+  "982":["Seattle","WA",224,89],"983":["Tacoma","WA",161,89],
+  "984":["Tacoma","WA",161,89],"985":["Olympia","WA",135,89],
+  "986":["Olympia","WA",135,89],"988":["Yakima","WA",107,89],
+  "989":["Yakima","WA",107,89],"990":["Spokane","WA",117,89],
+  "991":["Spokane","WA",117,89],"992":["Spokane","WA",117,89],
+  "993":["Richland","WA",107,89],"994":["Richland","WA",107,89],
+
+  // ── West Virginia ──
+  "247":["Bluefield","WV",107,79],"248":["Beckley","WV",107,79],
+  "249":["Lewisburg","WV",107,79],"250":["Charleston","WV",107,79],
+  "251":["Charleston","WV",107,79],"252":["Charleston","WV",107,79],
+  "253":["Charleston","WV",107,79],"254":["Martinsburg","WV",107,79],
+  "255":["Huntington","WV",107,79],"256":["Huntington","WV",107,79],
+  "257":["Huntington","WV",107,79],"258":["Lewisburg","WV",107,79],
+  "259":["Buckhannon","WV",107,79],"260":["Clarksburg","WV",107,79],
+  "261":["Clarksburg","WV",107,79],"262":["Clarksburg","WV",107,79],
+  "263":["Morgantown","WV",107,79],"264":["Morgantown","WV",107,79],
+  "265":["Morgantown","WV",107,79],"266":["Morgantown","WV",107,79],
+  "267":["Elkins","WV",107,79],"268":["Petersburg","WV",107,79],
+
+  // ── Wisconsin ──
+  "530":["Milwaukee","WI",130,79],"531":["Milwaukee","WI",130,79],
+  "532":["Racine","WI",107,79],"534":["Racine","WI",107,79],
+  "535":["Madison","WI",130,79],"537":["Madison","WI",130,79],
+  "538":["Madison","WI",130,79],"539":["Madison","WI",130,79],
+  "540":["Green Bay","WI",107,79],"541":["Green Bay","WI",107,79],
+  "542":["Green Bay","WI",107,79],"543":["Green Bay","WI",107,79],
+  "544":["Wausau","WI",107,79],"545":["Rhinelander","WI",107,79],
+  "546":["La Crosse","WI",107,79],"547":["La Crosse","WI",107,79],
+  "548":["Superior","WI",107,79],"549":["Superior","WI",107,79],
+
+  // ── Wyoming ──
+  "820":["Cheyenne","WY",107,79],"821":["Cheyenne","WY",107,79],
+  "822":["Wheatland","WY",107,79],"823":["Rawlins","WY",107,79],
+  "824":["Riverton","WY",107,79],"825":["Riverton","WY",107,79],
+  "826":["Casper","WY",107,79],"827":["Casper","WY",107,79],
+  "828":["Gillette","WY",107,79],"829":["Rock Springs","WY",107,79],
+  "830":["Rock Springs","WY",107,79],"831":["Jackson","WY",270,79]
+};
+
+function lookupGSA(zip){
+  const prefix=zip.substring(0,3);
+  const r=GSA_RATES[prefix]||null;
+  if(!r)return{city:'Standard CONUS',state:'',lodging:107,meals:68,fy:2025,isStandard:true};
+  const[city,state,lodging,meals]=r;
+  return{city,state,lodging,meals,fy:2025,isStandard:false};
+}
+
+
+// Recalculate hourly stipend when reg hours change, if a ZIP result is already showing
+let lastZipData=null;
+let currentZipHourly=0;
+function refreshZip(){
+  if(!lastZipData)return;
+  const rh=Math.max(parseFloat(document.getElementById('i-regHrs').value)||36,1);
+  currentZipHourly=((lastZipData.lodging+lastZipData.meals)*7)/rh;
+  showZipFound(lastZipData.city,lastZipData.state,lastZipData.lodging,lastZipData.meals,currentZipHourly,lastZipData.fy,lastZipData.isStandard,lastZipData.monthLabel);
+}
+
+function lookupZip(){
+  const zip=document.getElementById('zip-input').value.trim();
+  if(zip.length!==5){showZipErr('Enter a valid 5-digit US ZIP code.');return}
+  const btn=document.getElementById('zip-btn');
+  btn.textContent='✓';setTimeout(function(){btn.textContent='Look Up'},1500);
+  const monthSel=document.getElementById('zip-month').value;
+  const monthNames=['Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'];
+
+  const data=lookupGSA(zip);
+  let lodging=data.lodging;
+  let monthLabel='Peak Month';
+
+  // If user selected a specific month, note it (rate from table is the base/peak)
+  if(monthSel!=='max'){
+    monthLabel=monthNames[parseInt(monthSel)];
+    // Note: embedded table stores representative rate. For exact monthly rates,
+    // user should verify on GSA.gov (link provided in result)
+  }
+
+  const rh=Math.max(parseFloat(document.getElementById('i-regHrs').value)||36,1);
+  const hourly=((lodging+data.meals)*7)/rh;
+  lastZipData={...data,lodging,monthLabel};
+  currentZipHourly=hourly;
+  showZipFound(data.city,data.state,lodging,data.meals,hourly,data.fy,data.isStandard,monthLabel);
+}
+
+function showZipErr(msg){
+  const res=document.getElementById('zip-result');
+  res.innerHTML='<div class="zip-error">⚠ '+msg+'</div>';
+  res.classList.add('show');
+}
+
+function showZipFound(city,state,lodging,mie,hourly,fy,isStandard,monthLabel){
+  const icon=isStandard?'🇺🇸':'📍';
+  const label=isStandard?'<span style="font-size:.58rem;background:#fef3c7;color:#92400e;border-radius:3px;padding:1px 5px;font-weight:700;margin-left:4px">CONUS STD</span>':'';
+  const mLabel=monthLabel?' <span style="font-size:.56rem;background:#dbeafe;color:#1d4ed8;border-radius:3px;padding:1px 5px;font-weight:700;margin-left:3px">'+monthLabel+'</span>':'';
+  const zip=document.getElementById('zip-input').value.trim();
+  const gsaLink='<a href="https://www.gsa.gov/travel/plan-book/per-diem-rates/per-diem-rates-lookup/?action=perdiems_report&state=&fiscal_year=2025&zip='+zip+'&city=" target="_blank" style="font-size:.58rem;color:#059669;text-decoration:underline;margin-left:4px;font-weight:600">View on GSA ↗</a>';
+  const res=document.getElementById('zip-result');
+  res.innerHTML='<div class="zip-found"><div class="zip-found-left"><div class="zip-city">'+icon+' '+city+(state?', '+state:'')+' '+label+mLabel+gsaLink+'</div><div class="zip-breakdown">Lodging $'+lodging+' + M&amp;IE $'+mie+' = <strong>$'+(lodging+mie).toFixed(2)+'/day</strong> → <strong>$'+hourly.toFixed(2)+'/hr</strong></div></div><button class="zip-apply" onclick="applyStipend(currentZipHourly)">Apply →</button></div>';
+  res.classList.add('show');
+}
+
+function applyStipend(hourly){
+  const v=hourly.toFixed(2);
+  const nc=document.getElementById('i-stipend');
+  const ncOT=document.getElementById('i-otStipend');
+  const cal=document.getElementById('i-calStipend');
+  if(nc){nc.value=v;ncOT.value=v}
+  if(cal)cal.value=v;
+  const rh=Math.max(parseFloat(document.getElementById('i-regHrs').value)||36,1);
+  const daily=(hourly*rh)/7;
+  const housing=document.getElementById('i-housing');
+  const meals=document.getElementById('i-meals');
+  if(housing){housing.value=(daily*0.6).toFixed(2);meals.value=(daily*0.4).toFixed(2)}
+  calc();
+  const btn=document.querySelector('.zip-apply');
+  if(btn){btn.textContent='✓ Applied';btn.style.background='#065f46';setTimeout(function(){btn.textContent='Apply →';btn.style.background=''},2000)}
+}
+
+function calc(){
+  let r;
+  if(mode==='nc')r=calcNC();
+  else if(mode==='cal')r=calcCal();
+  else if(mode==='ogs')r=calcOGS();
+  if(r){lastResult=r;renderResults(r);scheduleSave(r)}
+}
+
+// Debounced auto-save — saves 1.5s after user stops editing
+function scheduleSave(r){
+  if(saveTimer)clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{
+    const hash=mode+'|'+V('i-billRate')+'|'+V('i-w2')+'|'+(mode==='cal'?V('i-calStipend'):mode==='ogs'?V('i-housing')+'|'+V('i-meals'):V('i-stipend'));
+    if(hash===lastSavedHash)return;
+    lastSavedHash=hash;
+    const snap={ts:Date.now(),mode,client:clientNameFromInputs(),inputs:snapshotInputs(),state:{...S},result:r};
+    addToHist(snap);
+  },1500);
+}
+
+function snapshotInputs(){
+  const ids=['i-billRate','i-mspFee','i-otMult','i-otAfter','i-regHrs','i-otHrs','i-weeks','i-orientHrs','i-onCall','i-cbMult','i-w2','i-stipend','i-otStipend','i-medTests','i-medInsType','i-medInsAmt','i-bonus','i-otherReimb','i-manualFee','i-client','i-calStipend','i-calBonus','i-calOtherReimb','i-calMedTests','i-calMedInsType','i-calMedInsAmt','i-housing','i-meals','i-flight','i-ogsMedTests'];
+  const obj={};ids.forEach(id=>{const e=document.getElementById(id);if(e)obj[id]=e.value});return obj;
+}
+function clientNameFromInputs(){const v=document.getElementById('i-client').value;return v!==''?CL[+v].n:null}
+
+function calcNC(){
+  const br=V('i-billRate');const _mfStr=document.getElementById('i-manualFee').value.trim();const _mfr=parseFloat(_mfStr);const mf=(_mfStr===''||isNaN(_mfr)||_mfr<=0)?V('i-mspFee')/100:_mfr/100;
+  const om=V('i-otMult')||1.25,oa=V('i-otAfter')||40,rh=V('i-regHrs'),oh=V('i-otHrs'),wk=Math.min(V('i-weeks')||13,13),ort=V('i-orientHrs'),oc=V('i-onCall');
+  const w2=V('i-w2'),sh=S.stip==='Y'?V('i-stipend'):0,os=S.stip==='Y'&&S.stipOT==='Y'?V('i-otStipend'):0;
+  const bn=V('i-bonus'),or_=V('i-otherReimb'),mt=V('i-medTests'),mi=document.getElementById('i-medInsType').value,ma=V('i-medInsAmt');
+  const lf=w2<30?1.33:1.30,ob=br*om,cr=rh*wk,co=oh*wk,th=cr+co;
+  const vf=S.vivian==='Y'&&(cr-ort)>0?1350*1.07/(cr-ort):0;
+  const rs=br*(1-mf)-vf,ro=ob*(1-mf);
+  let bl;if(oh===0||oa===0)bl=rs;else if(rh+oh<=oa)bl=rs;else{const x=rh+oh-oa;bl=(rh*rs+(oa-rh)*rs+x*ro)/(rh+oh)}
+  const pb=bl*th-br*ort;
+  let medIns=0;if(mi==='Monthly')medIns=ma*(wk/4.33);else if(mi==='Project')medIns=ma;
+  const allocHr=((bn+or_+mt+medIns)/wk)/Math.min(rh||1,36);
+  const pc=ort*w2*lf+(S.stipOrient==='Y'?ort*sh:0)+(cr-ort)*w2*lf+sh*(cr-ort)+co*w2*1.5*lf+(S.stipOT==='Y'?co*os:0)+allocHr*th;
+  const hm=th>0?(pb-pc)/th:0,otW2=w2*1.5;
+  const cbm=V('i-cbMult')||1.3,cbW2=w2*cbm,cbExp=sh*0.25;
+  return{margin:hm,billing:pb,totalHrs:th,totalRate:w2+sh,w2,stip:sh,otW2,blended:bl,wkW2:w2*rh+oh*otW2,wkSt:sh*rh,wkOtSt:S.stipOT==='Y'?os*oh:0,hrsWk:rh+oh,onCall:oc/2,cbW2,cbExp,tab:'nc'};
+}
+function calcCal(){
+  const br=V('i-billRate');const _mfStr=document.getElementById('i-manualFee').value.trim();const _mfr=parseFloat(_mfStr);const mf=(_mfStr===''||isNaN(_mfr)||_mfr<=0)?V('i-mspFee')/100:_mfr/100;
+  const om=V('i-otMult')||1.18,oa=V('i-otAfter')||40,rh=V('i-regHrs'),oh=V('i-otHrs'),wk=V('i-weeks')||13,ort=V('i-orientHrs'),oc=V('i-onCall');
+  const w2=V('i-w2'),sh=V('i-calStipend'),bn=V('i-calBonus'),or_=V('i-calOtherReimb'),mt=V('i-calMedTests');
+  const mi=document.getElementById('i-calMedInsType').value,ma=V('i-calMedInsAmt');
+  const lf=w2<30?1.33:1.30,ob=br*om,cr=rh*wk,co=oh*wk,th=cr+co;
+  const vf=S.calVivian==='Y'&&(cr-ort+co)>0?1350*1.07/(cr-ort+co):0;
+  const rs=br*(1-mf)-vf,ro=ob*(1-mf);
+  let bl;if(oh===0)bl=rs;else if(rh+oh<=oa)bl=rs;else{const x=rh+oh-oa;bl=(rh*rs+(oh-x)*rs+x*ro)/(rh+oh)}
+  const pb=bl*th-br*ort;
+  let medIns=0;if(mi==='Monthly')medIns=ma*(wk/4.33);else if(mi==='Project')medIns=ma;
+  const allocHr=((bn+or_+mt+medIns)/wk)/Math.min(rh||1,36);const otW2=w2*1.5;
+  const pc=ort*w2*lf+ort*sh+(cr-ort)*w2*lf+sh*(cr-ort)+co*otW2*lf+co*sh+allocHr*th;
+  const hm=th>0?(pb-pc)/th:0;
+  const cbm=V('i-cbMult')||1.3,cbW2=w2*cbm,cbExp=sh*0.25;
+  return{margin:hm,billing:pb,totalHrs:th,totalRate:w2+sh,w2,stip:sh,otW2,blended:bl,wkW2:w2*rh+oh*otW2,wkSt:sh*(rh+oh),hrsWk:rh+oh,onCall:oc/2,cbW2,cbExp,tab:'cal'};
+}
+function calcOGS(){
+  const br=V('i-billRate'),mf=V('i-mspFee')/100,rh=V('i-regHrs'),wk=V('i-weeks')||13,ort=V('i-orientHrs');
+  const fl=V('i-flight'),mt=V('i-ogsMedTests'),w2=V('i-w2'),hd=V('i-housing'),md=V('i-meals');
+  const pto=w2*.0465,w2n=w2*(1-.0465),cr=rh*wk;
+  const vf=cr>0?1350/cr:0,rs=br*(1-mf)-vf;
+  const pb=rs*(cr-ort);
+  const hWk=hd*7,mWk=md*7,stWk=hWk+mWk,stHr=rh>0?stWk/rh:0;
+  const allocHr=rh>0?((fl+mt)/wk)/rh:0;
+  const pc=ort*w2n*1.25+(cr-ort)*w2n*1.25+stHr*(cr-ort)+allocHr*cr+pto*cr*1.25;
+  const hm=cr>0?(pb-pc)/cr:0;
+  const ptoEl=document.getElementById('o-pto');if(ptoEl){ptoEl.textContent=F(pto);document.getElementById('o-w2net').textContent=F(w2n);document.getElementById('o-viv').textContent=F(vf)}
+  return{margin:hm,billing:pb,totalHrs:cr,totalRate:w2n+stHr+pto,w2n,stip:stHr,pto,otW2:w2n*1.5,blended:rs,w2Wk:w2n*rh,ptoWk:pto*rh,stWk,hrsWk:rh,tab:'ogs'};
+}
+
+function renderResults(r){
+  const neg=r.margin<0,t=r.tab;
+  let h=`<div class="hero ${neg?'neg':'pos'}"><div class="hero-row"><div class="hero-left"><div class="rh-label">${neg?'⚠ ':'✓ '}Hourly Profit Margin${t==='cal'?' · CA OT':t==='ogs'?' · OGS':''}</div><div class="rh-num"><span class="ds">$</span>${F(r.margin)}</div><div class="rh-sub">per billable hour</div></div><div class="rh-kpis"><div class="rh-kpi"><div class="rh-kpi-l">Project Billing</div><div class="rh-kpi-v">${D(r.billing)}</div></div><div class="rh-kpi"><div class="rh-kpi-l">Total Hours</div><div class="rh-kpi-v">${F(r.totalHrs,0)}</div></div></div></div></div>`;
+  h+=`<div class="r-card"><div class="r-card-h">Hourly Breakdown</div><div class="r-metrics"><div class="r-met hi"><div class="r-met-l">Total Rate</div><div class="r-met-v"><span class="d">$</span>${F(r.totalRate)}<span class="u">/hr</span></div></div><div class="r-met"><div class="r-met-l">${t==='ogs'?'W-2 Net':'W-2'}</div><div class="r-met-v"><span class="d">$</span>${F(t==='ogs'?r.w2n:r.w2)}<span class="u">/hr</span></div></div><div class="r-met"><div class="r-met-l">Stipend</div><div class="r-met-v"><span class="d">$</span>${F(r.stip)}<span class="u">/hr</span></div></div><div class="r-met tl"><div class="r-met-l">${t==='ogs'?'PTO':'OT W-2'}</div><div class="r-met-v"><span class="d">$</span>${F(t==='ogs'?r.pto:r.otW2)}<span class="u">/hr</span></div></div></div></div>`;
+  h+=`<div class="r-card"><div class="r-card-h">Weekly Breakdown</div><table class="bt"><thead><tr><th>Component</th><th>Weekly</th><th>Monthly</th></tr></thead><tbody>`;
+  h+=`<tr class="hl"><td>Blended Rate</td><td>${D(r.blended)}/hr</td><td>—</td></tr>`;
+  if(t==='ogs'){h+=`<tr><td>W-2</td><td>${D(r.w2Wk)}</td><td>${D(r.w2Wk*4)}</td></tr><tr><td>PTO</td><td>${D(r.ptoWk)}</td><td>—</td></tr><tr><td>Stipend</td><td>${D(r.stWk)}</td><td>${D(r.stWk*4)}</td></tr><tr><td>Hours/Wk</td><td>${F(r.hrsWk,0)}</td><td>—</td></tr><tr class="tot"><td>Weekly Gross</td><td>${D(r.w2Wk+r.ptoWk+r.stWk)}</td><td>—</td></tr>`}
+  else{h+=`<tr><td>W-2</td><td>${D(r.wkW2)}</td><td>${D(r.wkW2*4)}</td></tr><tr><td>Stipend</td><td>${D(r.wkSt)}</td><td>${D(r.wkSt*4)}</td></tr>`;if(t==='nc')h+=`<tr><td>OT Stipend</td><td>${D(r.wkOtSt||0)}</td><td>—</td></tr>`;h+=`<tr><td>Hours/Wk</td><td>${F(r.hrsWk,0)}</td><td>—</td></tr><tr class="tot"><td>Weekly Gross</td><td>${D(r.wkW2+r.wkSt+(r.wkOtSt||0))}</td><td>—</td></tr>`}
+  h+=`</tbody></table><div class="chips">`;
+  if(t==='ogs'){h+=`<span class="chip">OT W-2: ${D(r.otW2)}/hr</span>`}
+  else{h+=`<span class="chip">On Call: ${D(r.onCall)}/hr</span><span class="chip">CB W-2: ${D(r.cbW2)}/hr</span><span class="chip">CB Exp: ${D(r.cbExp)}/hr</span>`}
+  h+=`</div></div>`;
+  document.getElementById('results-area').innerHTML=h;
+}
+
+function timeAgo(ts){const s=Math.floor((Date.now()-ts)/1000);if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+' min ago';if(s<86400)return Math.floor(s/3600)+' hr ago';return Math.floor(s/86400)+' days ago'}
+
+function renderHist(){
+  const list=loadHist(),cont=document.getElementById('hist-list');
+  if(list.length===0){cont.innerHTML=`<div class="h-empty"><div class="h-empty-icon">🕒</div><div class="h-empty-t">No saved packages yet</div><div class="h-empty-d">Change any input and your calculation auto-saves here for 7 days.</div></div>`;return}
+  let h='<div class="h-list">';
+  list.forEach((e,i)=>{
+    const tag=e.mode==='cal'?'<span class="h-tag ca">CA</span>':e.mode==='ogs'?'<span class="h-tag og">OGS</span>':'<span class="h-tag">Std</span>';
+    const m=e.result.margin,neg=m<0;
+    h+=`<div class="h-item" id="hi-${i}"><div class="h-item-head" onclick="toggleHist(${i})"><div class="h-item-margin ${neg?'neg':'pos'}">${neg?'-':''}$${F(Math.abs(m))}/hr</div><div class="h-item-body"><div class="h-item-name">${e.client||'Custom'} ${tag}</div><div class="h-item-meta">${new Date(e.ts).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})} · ${timeAgo(e.ts)}</div></div><svg class="h-item-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><div class="h-item-detail"><div class="h-d-grid"><div class="h-d-card"><div class="h-d-h">Billing</div><div class="h-d-row"><span>Bill Rate</span><span>$${F(+e.inputs['i-billRate'])}</span></div><div class="h-d-row"><span>MSP Fee</span><span>${F(+e.inputs['i-mspFee'])}%</span></div><div class="h-d-row"><span>Reg Hrs/Wk</span><span>${e.inputs['i-regHrs']}</span></div><div class="h-d-row"><span>OT Hrs/Wk</span><span>${e.inputs['i-otHrs']||0}</span></div><div class="h-d-row"><span>Weeks</span><span>${e.inputs['i-weeks']}</span></div></div><div class="h-d-card"><div class="h-d-h">Package</div><div class="h-d-row"><span>W-2</span><span>$${F(+e.inputs['i-w2'])}</span></div><div class="h-d-row"><span>Stipend</span><span>$${F(+(e.mode==='cal'?e.inputs['i-calStipend']:e.inputs['i-stipend']||0))}</span></div><div class="h-d-row"><span>Vivian</span><span>${e.mode==='cal'?e.state.calVivian:e.state.vivian}</span></div><div class="h-d-row"><span>Project Billing</span><span>${D(e.result.billing)}</span></div><div class="h-d-row"><span>Total Hours</span><span>${F(e.result.totalHrs,0)}</span></div></div></div><button class="h-load-btn" onclick="loadFromHist(${i})">↻ Load into Calculator</button></div></div>`;
+  });
+  h+='</div>';cont.innerHTML=h;
+}
+function toggleHist(i){const el=document.getElementById('hi-'+i);document.querySelectorAll('.h-item').forEach(it=>{if(it!==el)it.classList.remove('open')});el.classList.toggle('open')}
+
+function loadFromHist(i){
+  const list=loadHist(),e=list[i];if(!e)return;
+  setMode(e.mode);
+  Object.assign(S,e.state);
+  ['stip','stipOT','stipOrient','vivian','calVivian'].forEach(k=>{
+    if(S[k]){const Y=document.getElementById('b-'+k+'-y'),N=document.getElementById('b-'+k+'-n');
+    if(Y)Y.className=S[k]==='Y'?'on':'';if(N)N.className=S[k]==='N'?'off':''}
+  });
+  document.getElementById('stip-fields').style.display=S.stip==='Y'?'':'none';
+  document.getElementById('ot-stip-row').style.display=S.stipOT==='Y'?'':'none';
+  Object.keys(e.inputs).forEach(id=>{const el=document.getElementById(id);if(el)el.value=e.inputs[id]});
+  calc();
+}
+
+calc();
+</script>
+</body>
+</html>
