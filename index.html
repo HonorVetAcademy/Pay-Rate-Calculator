@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>HonorVet · Nurse Pay Rate Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+  /* ── FLUID TYPOGRAPHY & SPACING ────────────────────────────────────────
+     Scale linearly from 1280px → 1920px viewport width.
+     All font sizes, paddings, and gaps scale automatically.
+     clamp(MIN, PREFERRED, MAX)
+     PREFERRED = viewport-relative calc so it interpolates smoothly.
+  ─────────────────────────────────────────────────────────────────────── */
+
+  :root{
+    /* Font scale: smaller on 1280px, larger on 1920px */
+    /* Fluid typography: scales smoothly with viewport width */
+    --f-xs:   clamp(0.52rem, 0.48rem + 0.22vw, 0.68rem);
+    --f-sm:   clamp(0.60rem, 0.55rem + 0.26vw, 0.76rem);
+    --f-base: clamp(0.68rem, 0.62rem + 0.30vw, 0.84rem);
+    --f-md:   clamp(0.74rem, 0.68rem + 0.32vw, 0.92rem);
+    --f-lg:   clamp(0.80rem, 0.74rem + 0.34vw, 1.00rem);
+    --f-xl:   clamp(0.88rem, 0.82rem + 0.36vw, 1.10rem);
+    --f-2xl:  clamp(1.05rem, 0.96rem + 0.46vw, 1.40rem);
+    --f-hero: clamp(1.70rem, 1.30rem + 1.50vw, 3.00rem);
+
+    /* Spacing scale */
+    --sp-1: clamp(2px,  0.15vw, 4px);
+    --sp-2: clamp(4px,  0.30vw, 7px);
+    --sp-3: clamp(6px,  0.45vw, 10px);
+    --sp-4: clamp(8px,  0.60vw, 14px);
+    --sp-5: clamp(10px, 0.75vw, 18px);
+    --sp-6: clamp(12px, 0.90vw, 22px);
+    --sp-8: clamp(14px, 1.10vw, 28px);
+  }
+:root{--sans:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;--em:#10b981;--emD:#059669;--emDD:#064e3b;--amD:#d97706;--rd:#ef4444}
+html,body{height:100vh;overflow:hidden}
+body{font-family:var(--sans);background:linear-gradient(135deg,#0f172a 0%,#1e293b 40%,#0f2027 100%);-webkit-font-smoothing:antialiased;color:#fff;display:flex;flex-direction:column}
+
+/* TOP BAR */
+.top{height:48px;display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.06)}
+.top-logo{width:clamp(22px,1.8vw,32px);height:clamp(22px,1.8vw,32px);border-radius:8px;background:linear-gradient(135deg,#34d399,#059669);display:flex;align-items:center;justify-content:center;font-size:var(--f-xs);font-weight:900;color:#fff;box-shadow:0 2px 10px rgba(16,185,129,.4)}
+.top-brand{font-size:var(--f-lg);font-weight:800;letter-spacing:-.01em}
+.top-sep{width:1px;height:18px;background:rgba(255,255,255,.1)}
+.top-sub{font-size:var(--f-xs);font-weight:600;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em}
+.top-tabs{margin-left:auto;display:flex;gap:3px;background:rgba(255,255,255,.06);border-radius:10px;padding:3px;border:1px solid rgba(255,255,255,.06)}
+.top-tab{padding:clamp(4px,0.35vw,7px) clamp(8px,0.9vw,14px);border:none;border-radius:7px;font-family:var(--sans);font-size:var(--f-sm);font-weight:600;color:rgba(255,255,255,.5);cursor:pointer;background:transparent;transition:all .2s;display:flex;align-items:center;gap:5px}
+.top-tab:hover{color:rgba(255,255,255,.85)}
+.top-tab.on{background:rgba(255,255,255,.13);color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.pill{font-size:var(--f-xs);font-weight:700;border-radius:3px;padding:1px 5px}
+.pill.r{background:rgba(239,68,68,.2);color:#fca5a5}
+.pill.b{background:rgba(99,102,241,.2);color:#a5b4fc}
+.pill.g{background:rgba(16,185,129,.2);color:#6ee7b7}
+.pill.h{background:rgba(245,158,11,.2);color:#fcd34d}
+
+/* MAIN — TWO COLUMN LAYOUT */
+.main{flex:1;overflow:hidden;display:grid;grid-template-columns:1fr 1fr 1.3fr;padding:var(--sp-4) var(--sp-4) var(--sp-2);gap:var(--sp-4);min-height:0}
+
+.panel{display:flex;flex-direction:column;min-height:0;background:#fff;color:#0f172a;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.15),0 16px 40px rgba(0,0,0,.25);overflow:hidden;min-width:0}
+
+.panel-billing .panel-head{background:linear-gradient(135deg,#eff6ff,#dbeafe);border-bottom-color:#bfdbfe}
+.panel-package .panel-head{background:linear-gradient(135deg,#fef3c7,#fde68a);border-bottom-color:#fcd34d}
+.panel-results .panel-head{background:linear-gradient(135deg,#ecfdf5,#d1fae5);border-bottom-color:#a7f3d0}
+.panel-billing .panel-title-ico{background:#bfdbfe;color:#1e40af}
+.panel-package .panel-title-ico{background:#fcd34d;color:#92400e}
+.panel-results .panel-title-ico{background:#a7f3d0;color:#065f46}
+
+.panel-head{padding:var(--sp-3) var(--sp-5);border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:9px;flex-shrink:0}
+.panel-title-ico{width:clamp(20px,1.6vw,28px);height:clamp(20px,1.6vw,28px);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:var(--f-xs);font-weight:800;flex-shrink:0}
+.panel-title-wrap{display:flex;flex-direction:column;min-width:0;flex:1}
+.panel-title{font-size:var(--f-base);font-weight:800;color:#0f172a;letter-spacing:-.01em;line-height:1.2}
+.panel-sub{font-size:var(--f-xs);font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-top:1px}
+.panel-body{flex:1;overflow-y:auto;padding:var(--sp-4) var(--sp-5) var(--sp-6);scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent}
+.panel-body::-webkit-scrollbar{width:6px}
+.panel-body::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+
+/* FORM */
+.section-head{display:flex;align-items:center;gap:6px;margin:var(--sp-3) 0 var(--sp-2);font-size:var(--f-xs);font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#94a3b8}
+.section-head:first-child{margin-top:0}
+.section-head::after{content:'';flex:1;height:1px;background:#e2e8f0}
+.section-head .badge{padding:1px 6px;border-radius:3px;font-size:var(--f-xs);font-weight:700;background:#fef3c7;color:#92400e}
+
+.fg{margin-bottom:var(--sp-2)}
+.fg>label{display:block;font-size:var(--f-xs);font-weight:600;color:#64748b;margin-bottom:var(--sp-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fg>label .dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:#fb923c;margin-left:3px;vertical-align:middle}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px}
+.iw{position:relative}
+.pfx{position:absolute;left:7px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:var(--f-sm);font-weight:700;color:var(--amD);pointer-events:none}
+.sfx{position:absolute;right:7px;top:50%;transform:translateY(-50%);font-size:var(--f-xs);color:#94a3b8;pointer-events:none}
+input[type=number],select{width:100%;border-radius:8px;font-family:var(--mono);font-size:var(--f-sm);font-weight:500;color:#0f172a;outline:none;padding:var(--sp-2) var(--sp-3);transition:all .15s;background:#f8fafc;border:1.5px solid #e2e8f0}
+input:focus,select:focus{border-color:var(--em);box-shadow:0 0 0 3px rgba(16,185,129,.12);background:#fff}
+input.rq{background:#fffbeb;border:2px solid #fbbf24}
+input.rq:focus{border-color:var(--amD);box-shadow:0 0 0 3px rgba(245,158,11,.1);background:#fff}
+input.hp{padding-left:18px}input.hs{padding-right:24px}
+select{font-family:var(--sans);font-weight:500;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:26px}
+.tg{display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:var(--sp-1) var(--sp-3);margin-bottom:var(--sp-1)}
+.tg-l{font-size:var(--f-sm);font-weight:600;color:#475569}
+.tg-sw{display:flex;background:#e5e7eb;border-radius:6px;padding:2px;gap:2px}
+.tg-sw button{padding:var(--sp-1) var(--sp-3);border:none;border-radius:5px;font-family:var(--sans);font-size:var(--f-xs);font-weight:700;cursor:pointer;background:transparent;color:#94a3b8;transition:all .12s}
+.tg-sw button.on{background:var(--em);color:#fff;box-shadow:0 2px 6px rgba(16,185,129,.35);font-weight:800}
+.tg-sw button.off{background:#fee2e2;color:#b91c1c;font-weight:800}
+.tg-sw button:not(.on):not(.off){color:#94a3b8;font-weight:600}
+.legend{display:flex;gap:10px;margin-top:var(--sp-3);padding-top:var(--sp-2);border-top:1px solid #f1f5f9;font-size:var(--f-xs);color:#94a3b8;font-weight:500;justify-content:center}
+.legend-item{display:flex;align-items:center;gap:5px}
+.legend-sw{width:14px;height:10px;border-radius:3px}
+.legend-sw.rq{background:#fffbeb;border:2px solid #fbbf24}
+.legend-sw.df{background:#f8fafc;border:1.5px solid #e2e8f0}
+
+/* RESULTS PANEL */
+.results-body{padding:var(--sp-4) var(--sp-5) var(--sp-6);overflow-y:auto;flex:1;scrollbar-width:thin}
+.results-body::-webkit-scrollbar{width:6px}
+.results-body::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+
+.hero{border-radius:12px;padding:var(--sp-4) var(--sp-5);position:relative;overflow:hidden;margin-bottom:8px;transition:all .3s}
+.hero.pos{background:linear-gradient(135deg,#064e3b,#047857,#059669);box-shadow:0 6px 24px rgba(5,150,105,.25)}
+.hero.neg{background:linear-gradient(135deg,#7f1d1d,#b91c1c,#ef4444);box-shadow:0 6px 24px rgba(239,68,68,.25)}
+.hero::before{content:'';position:absolute;top:-30%;right:-15%;width:50%;height:160%;border-radius:50%;background:rgba(255,255,255,.04)}
+.hero-row{display:flex;flex-direction:column;gap:8px;position:relative;z-index:1}
+.hero-left{min-width:0}
+.rh-label{font-size:var(--f-xs);font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:rgba(255,255,255,.5);margin-bottom:4px}
+.rh-num{font-family:var(--mono);font-weight:900;color:#fff;font-size:var(--f-hero);line-height:1;letter-spacing:-1.5px}
+.hero.neg .rh-num{color:#fecaca}
+.rh-num .ds{font-size:var(--f-base);opacity:.4;vertical-align:top;margin-top:3px;display:inline-block;margin-right:2px}
+.rh-sub{font-size:var(--f-xs);color:rgba(255,255,255,.4);font-weight:500;margin-top:2px}
+.rh-kpis{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.rh-kpi{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.08);border-radius:7px;padding:5px 8px}
+.rh-kpi-l{font-size:var(--f-xs);font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:1px}
+.rh-kpi-v{font-family:var(--mono);font-size:var(--f-sm);font-weight:700;color:#fff}
+
+.r-card{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:11px;padding:var(--sp-3) var(--sp-4);margin-bottom:var(--sp-2)}
+.r-card-h{font-size:var(--f-xs);font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;margin-bottom:6px}
+.r-metrics{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.r-met{border-radius:8px;padding:var(--sp-2) var(--sp-3);border:1.5px solid #e2e8f0;background:#fff;min-width:0}
+.r-met.hi{background:#ecfdf5;border-color:#a7f3d0}
+.r-met.tl{background:#ecfeff;border-color:#a5f3fc}
+.r-met-l{font-size:var(--f-xs);font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.r-met-v{font-family:var(--mono);font-size:var(--f-sm);font-weight:700;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r-met-v .d{color:var(--amD);font-size:var(--f-xs)}.r-met-v .u{font-size:var(--f-xs);color:#94a3b8}
+table.bt{width:100%;border-collapse:collapse}
+.bt th{font-size:var(--f-xs);font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#cbd5e1;padding:0 6px 4px;text-align:right}
+.bt th:first-child{text-align:left}
+.bt td{font-size:var(--f-sm);padding:var(--sp-1) var(--sp-2);border-top:1px solid #f1f5f9;text-align:right;font-family:var(--mono);font-weight:500;color:#475569}
+.bt td:first-child{text-align:left;font-family:var(--sans);color:#94a3b8;font-weight:600;font-size:var(--f-xs)}
+.bt tr.hl td{background:#ecfdf5;color:#065f46;font-weight:700}
+.bt tr.tot td{border-top:2px solid #e2e8f0;color:var(--emD);font-weight:700;padding-top:6px}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;padding-top:6px;border-top:1px solid #f1f5f9}
+.chip{font-size:var(--f-xs);font-weight:600;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;padding:var(--sp-1) var(--sp-2);font-family:var(--mono);color:#64748b}
+.auto-tile{background:#eef2ff;border:1.5px solid #c7d2fe;border-radius:8px;padding:var(--sp-2) var(--sp-3);display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--sp-1)}
+.auto-tile-l{font-size:var(--f-xs);font-weight:700;color:#818cf8;text-transform:uppercase;letter-spacing:.04em}
+.auto-tile-v{font-family:var(--mono);font-size:var(--f-sm);font-weight:700;color:#4338ca}
+
+/* ALT VIEWS — GUIDE & HISTORY take full main area */
+.alt-view{display:none;background:#fff;color:#0f172a;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.15),0 16px 40px rgba(0,0,0,.25);overflow-y:auto;scrollbar-width:thin}
+.alt-view::-webkit-scrollbar{width:8px}
+.alt-view::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}
+/* In guide/history mode: switch grid to single column, hide panels, show alt-view full width */
+body.guide-mode .main,body.history-mode .main{display:flex}
+body.guide-mode .main>.panel,body.history-mode .main>.panel{display:none}
+body.guide-mode .alt-view.guide,body.history-mode .alt-view.history{display:block;flex:1;min-height:0}
+
+/* GUIDE */
+.guide{padding:30px 44px 50px}
+.guide-inner{max-width:920px;margin:0 auto}
+.g-title{font-size:var(--f-hero);font-weight:900;color:#0f172a;letter-spacing:-.03em;margin-bottom:8px}
+.g-sub{font-size:var(--f-base);color:#64748b;line-height:1.7;margin-bottom:28px;max-width:680px}
+.g-section{margin-bottom:30px}
+.g-h{font-size:var(--f-lg);font-weight:800;color:#1e293b;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.g-h::before{content:'';width:4px;height:22px;border-radius:2px;background:linear-gradient(180deg,var(--em),var(--emD))}
+.g-p{font-size:var(--f-base);color:#475569;line-height:1.8;margin-bottom:12px}
+.g-p strong{color:#1e293b;font-weight:700}
+.g-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.g-card{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:18px;transition:all .15s}
+.g-card:hover{border-color:#a7f3d0;background:#ecfdf5;transform:translateY(-1px)}
+.g-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#ecfdf5,#d1fae5);display:flex;align-items:center;justify-content:center;font-size:var(--f-lg);margin-bottom:10px;border:1px solid #a7f3d0}
+.g-card-t{font-size:var(--f-base);font-weight:700;color:#0f172a;margin-bottom:5px}
+.g-card-d{font-size:var(--f-sm);color:#64748b;line-height:1.6}
+.g-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:var(--f-base);border-radius:10px;overflow:hidden;max-width:680px}
+.g-table th{background:#f8fafc;padding:var(--sp-3) var(--sp-4);text-align:left;font-weight:700;color:#64748b;border:1px solid #e2e8f0;font-size:var(--f-xs);text-transform:uppercase;letter-spacing:.04em}
+.g-table td{padding:var(--sp-3) var(--sp-4);border:1px solid #e2e8f0;color:#475569}
+.g-table td.m{font-family:var(--mono);font-weight:600;color:#0f172a}
+.g-table tr.win td{background:#ecfdf5;color:#065f46;font-weight:600}
+.g-callout{background:#ecfdf5;border:1.5px solid #a7f3d0;border-radius:14px;padding:var(--sp-5);font-size:var(--f-base);color:#065f46;line-height:1.7;margin:14px 0;max-width:680px}
+.g-callout strong{font-weight:700}
+.g-warn{background:#fef2f2;border:1.5px solid #fecaca;border-radius:14px;padding:var(--sp-5);font-size:var(--f-base);color:#991b1b;line-height:1.7;margin:14px 0;max-width:680px}
+.g-tips{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+.g-tip{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:var(--sp-4);font-size:var(--f-sm);color:#475569;line-height:1.55}
+.g-tip strong{color:#0f172a;display:block;margin-bottom:3px;font-weight:700;font-size:var(--f-base)}
+
+/* HISTORY */
+.history{padding:28px 36px 40px}
+.h-inner{max-width:760px;margin:0 auto}
+.h-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.h-title{font-size:var(--f-2xl);font-weight:900;color:#0f172a;letter-spacing:-.02em}
+.h-clear{padding:6px 14px;border-radius:8px;border:1.5px solid #fecaca;background:#fef2f2;color:#dc2626;font-size:var(--f-sm);font-weight:700;cursor:pointer;font-family:var(--sans);transition:all .15s}
+.h-clear:hover{background:#fee2e2}
+.h-sub{font-size:var(--f-sm);color:#64748b;margin-bottom:20px;line-height:1.55}
+.h-empty{text-align:center;padding:60px 20px;color:#94a3b8}
+.h-empty-icon{font-size:var(--f-hero);margin-bottom:12px;opacity:.4}
+.h-empty-t{font-size:var(--f-md);font-weight:700;color:#475569;margin-bottom:6px}
+.h-empty-d{font-size:var(--f-base);color:#94a3b8;line-height:1.6}
+.h-list{display:flex;flex-direction:column;gap:8px}
+.h-item{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;overflow:hidden;transition:all .15s}
+.h-item:hover{border-color:#cbd5e1;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.h-item.open{border-color:var(--em);background:#fff;box-shadow:0 4px 16px rgba(16,185,129,.08)}
+.h-item-head{padding:12px 16px;cursor:pointer;display:flex;align-items:center;gap:14px}
+.h-item-margin{font-family:var(--mono);font-size:var(--f-md);font-weight:800;min-width:100px;text-align:left}
+.h-item-margin.pos{color:var(--emD)}
+.h-item-margin.neg{color:var(--rd)}
+.h-item-body{flex:1;min-width:0}
+.h-item-name{font-size:var(--f-sm);font-weight:700;color:#0f172a;display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.h-tag{font-size:var(--f-xs);font-weight:700;padding:1px 5px;border-radius:3px;background:#f1f5f9;color:#64748b;text-transform:uppercase;letter-spacing:.04em}
+.h-tag.ca{background:#fef2f2;color:#dc2626}.h-tag.og{background:#eef2ff;color:#6366f1}
+.h-item-meta{font-size:var(--f-xs);color:#94a3b8}
+.h-item-arrow{transition:transform .2s;color:#cbd5e1;flex-shrink:0}
+.h-item.open .h-item-arrow{transform:rotate(180deg);color:var(--em)}
+.h-item-detail{padding:0 16px;max-height:0;overflow:hidden;transition:all .3s;border-top:1px solid transparent}
+.h-item.open .h-item-detail{padding:16px;max-height:600px;border-top-color:#e2e8f0}
+.h-d-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.h-d-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:9px 11px}
+.h-d-h{font-size:var(--f-xs);font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.h-d-row{display:flex;justify-content:space-between;font-size:var(--f-sm);padding:2px 0}
+.h-d-row span:first-child{color:#64748b}
+.h-d-row span:last-child{font-family:var(--mono);color:#0f172a;font-weight:600}
+.h-load-btn{width:100%;padding:var(--sp-3);border-radius:10px;border:none;background:linear-gradient(135deg,var(--em),var(--emD));color:#fff;font-family:var(--sans);font-size:var(--f-sm);font-weight:700;cursor:pointer;transition:all .15s;box-shadow:0 2px 6px rgba(16,185,129,.25)}
+.h-load-btn:hover{box-shadow:0 4px 12px rgba(16,185,129,.35);transform:translateY(-1px)}
+
+/* FOOTER */
+.ft{text-align:center;padding:var(--sp-1);font-size:var(--f-xs);color:rgba(255,255,255,.25);font-weight:500;flex-shrink:0}
+.ft b{color:rgba(16,185,129,.5);font-weight:700}
+
+.zip-widget{background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:1.5px solid #a7f3d0;border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.zip-title{font-size:var(--f-xs);font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#065f46;margin-bottom:7px;display:flex;align-items:center;gap:5px}
+.zip-row{display:flex;gap:5px;align-items:center}
+.zip-input{flex:1;min-width:0;border-radius:8px;font-family:var(--mono);font-size:var(--f-sm);font-weight:600;color:#0f172a;outline:none;padding:6px 9px;background:#fff;border:1.5px solid #a7f3d0;transition:all .15s}
+.zip-input:focus{border-color:var(--emD);box-shadow:0 0 0 3px rgba(5,150,105,.1)}
+.zip-btn{padding:6px 12px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--em),var(--emD));color:#fff;font-family:var(--sans);font-size:var(--f-sm);font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s;box-shadow:0 1px 4px rgba(16,185,129,.25);flex-shrink:0}
+.zip-btn:hover{box-shadow:0 3px 10px rgba(16,185,129,.35);transform:translateY(-1px)}
+.zip-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.zip-result{margin-top:7px;display:none}
+.zip-result.show{display:block}
+.zip-found{background:#fff;border:1px solid #a7f3d0;border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:8px}
+.zip-found-left{min-width:0}
+.zip-city{font-size:var(--f-sm);font-weight:700;color:#065f46;margin-bottom:2px;display:flex;align-items:center;flex-wrap:wrap;gap:2px}
+.zip-breakdown{font-size:var(--f-xs);color:#64748b;font-family:var(--mono);line-height:1.4}
+.zip-apply{padding:5px 12px;border:none;border-radius:7px;background:linear-gradient(135deg,var(--em),var(--emD));color:#fff;font-family:var(--sans);font-size:var(--f-xs);font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;box-shadow:0 1px 3px rgba(16,185,129,.2)}
+.zip-apply:hover{background:var(--emDD)}
+.zip-error{font-size:var(--f-sm);color:#dc2626;font-weight:600;margin-top:5px;padding:6px 10px;background:#fef2f2;border-radius:7px;border:1px solid #fecaca}
+.zip-note{font-size:var(--f-xs);color:#94a3b8;margin-top:4px;line-height:1.4}
+.tab-warn{display:none;padding:var(--sp-2) var(--sp-4);font-size:var(--f-md);font-weight:700;border-radius:0;text-align:center;gap:6px;align-items:center;justify-content:center}
+.tab-warn.show{display:flex}
+.tab-warn.std{background:#fffbeb;color:#92400e;border-bottom:1.5px solid #fde68a}
+.tab-warn.cal{background:#ecfdf5;color:#065f46;border-bottom:1.5px solid #a7f3d0}
+/* Mobile/small screen fallback */
+@media (max-width:1100px){
+  .main{grid-template-columns:1fr 1fr}
+  .panel-results{grid-column:1/-1}
+}
+@media (max-width:700px){
+  .main{grid-template-columns:1fr}
+  .panel-results{grid-column:auto}
+}
+</style>
+</script>
+</head>
+<body>
+
+<div class="top">
+  <div class="top-logo">H</div>
+  <span class="top-brand">HonorVet Technologies</span>
+  <span class="top-sep"></span>
+  <span class="top-sub">Nurse Pay Calculator</span>
+  <div class="top-tabs">
+    <button class="top-tab on" id="tab-nc" onclick="setMode('nc')">Standard</button>
+    <button class="top-tab" id="tab-cal" onclick="setMode('cal')">California<span class="pill r">CA</span></button>
+    <button class="top-tab" id="tab-ogs" onclick="setMode('ogs')">OGS<span class="pill b">OGS</span></button>
+    <button class="top-tab" id="tab-guide" onclick="setMode('guide')">How to Use<span class="pill g">?</span></button>
+    <button class="top-tab" id="tab-history" onclick="setMode('history')">History<span class="pill h">7d</span></button>
+    <button class="top-tab" id="btn-pdf" onclick="downloadPDF()" title="Download calculation as PDF"
+            style="background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;font-weight:700;letter-spacing:.02em">⬇ PDF</button>
+    <button class="top-tab" id="btn-excel" onclick="downloadExcel()" title="Export to Excel"
+            style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;font-weight:700;letter-spacing:.02em">⬇ Excel</button>
+  </div>
+</div>
+
+<div class="tab-warn std show" id="warn-std">⚠️ Standard calculator is for contracts up to <strong>40 regular hrs/week</strong>. For 48-hr positions, use the <strong>California OT</strong> tab instead.</div>
+<div class="tab-warn cal" id="warn-cal">✅ California OT handles <strong>48-hr/week contracts</strong> with correct overtime thresholds — use this tab for all CA placements.</div>
+<div class="main">
+
+<!-- PANEL 1: BILLING -->
+<div class="panel panel-billing">
+  <div class="panel-head">
+    <div class="panel-title-ico">💰</div>
+    <div class="panel-title-wrap">
+      <span class="panel-title">Billing to Client</span>
+      <span class="panel-sub" id="mode-label">Standard</span>
+    </div>
+  </div>
+  <div class="panel-body">
+    <div class="row2">
+      <div class="fg"><label>Bill Rate <span class="dot"></span></label><div class="iw"><span class="pfx">$</span><input type="number" class="hp rq" id="i-billRate" value="100" step="0.01" oninput="calc()"/></div></div>
+      <div class="fg"><label>MSP Fee <span class="dot"></span></label><div class="iw"><input type="number" class="hs rq" id="i-mspFee" value="5" step="0.1" oninput="calc()"/><span class="sfx">%</span></div></div>
+    </div>
+    <div class="row2">
+      <div class="fg"><label>OT Multiplier</label><input type="number" id="i-otMult" value="1.3" step="0.01" oninput="calc()"/></div>
+      <div class="fg"><label>OT After (hrs)</label><input type="number" id="i-otAfter" value="40" step="1" oninput="calc()"/></div>
+    </div>
+    <div class="row3">
+      <div class="fg"><label>Reg Hrs/Wk <span class="dot"></span></label><input type="number" class="rq" id="i-regHrs" value="36" step="1" oninput="calc();refreshZip()"/></div>
+      <div class="fg"><label>OT Hrs/Wk <span class="dot"></span></label><input type="number" class="rq" id="i-otHrs" value="0" step="1" oninput="calc()"/></div>
+      <div class="fg"><label>Weeks <span class="dot"></span></label><input type="number" class="rq" id="i-weeks" value="13" step="1" oninput="calc()"/></div>
+    </div>
+    <div class="row2">
+      <div class="fg"><label>Orient Hrs</label><input type="number" id="i-orientHrs" value="0" step="1" oninput="calc()"/></div>
+      <div class="fg"><label>On-Call Rate</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-onCall" value="0" step="0.01" oninput="calc()"/></div></div>
+    </div>
+    <div class="fg"><label>Call-Back Multiplier</label><input type="number" id="i-cbMult" value="1.3" step="0.01" oninput="calc();updateOtStip()"/></div>
+    <div class="section-head">GSA Per Diem Lookup</div>
+    <div class="zip-widget">
+      <div class="zip-title">📍 GSA Per Diem Lookup</div>
+      <div class="zip-row">
+        <input class="zip-input" id="zip-input" type="text" maxlength="5" placeholder="ZIP code" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
+        <select id="zip-month" style="width:84px;border-radius:8px;font-family:var(--sans);font-size:var(--f-sm);font-weight:600;padding:var(--sp-2) var(--sp-1);border:1.5px solid #a7f3d0;background:#fff;color:#065f46;outline:none;cursor:pointer;flex-shrink:0">
+          <option value="max">Peak Month</option>
+          <option value="0">Oct</option><option value="1">Nov</option><option value="2">Dec</option>
+          <option value="3">Jan</option><option value="4">Feb</option><option value="5">Mar</option>
+          <option value="6">Apr</option><option value="7">May</option><option value="8">Jun</option>
+          <option value="9">Jul</option><option value="10">Aug</option><option value="11">Sep</option>
+        </select>
+        <button class="zip-btn" id="zip-btn" onclick="lookupZip()">Look Up</button>
+      </div>
+      <div class="zip-result" id="zip-result"></div>
+      <div class="zip-note">Base rates from GSA FY2025. Rates vary by month — <a href="https://www.gsa.gov/travel/plan-book/per-diem-rates/per-diem-rates-lookup" target="_blank" style="color:#059669;text-decoration:underline;font-weight:600">verify on GSA.gov</a></div>
+    </div>
+    <div class="section-head">Client</div>
+    <select id="i-client" onchange="pickClient()"><option value="">Select client (optional)</option></select>
+    <div class="section-head" style="margin-top:10px">Clinician Details</div>
+    <div class="fg"><label>Clinician Name</label><input type="text" class="hp" id="i-clinicianName" placeholder="Full name" style="width:100%;padding:var(--sp-2) var(--sp-3);border-radius:9px;border:1.5px solid #e2e8f0;font-family:var(--sans);font-size:var(--f-sm);color:#0f172a;outline:none;background:#fff" oninput="calc()"/></div>
+    <div class="fg"><label>Job Title</label><input type="text" class="hp" id="i-clinicianTitle" placeholder="e.g. RN - Medical Surgical" style="width:100%;padding:var(--sp-2) var(--sp-3);border-radius:9px;border:1.5px solid #e2e8f0;font-family:var(--sans);font-size:var(--f-sm);color:#0f172a;outline:none;background:#fff" oninput="calc()"/></div>
+    <div class="fg"><label>Location</label><input type="text" class="hp" id="i-clinicianLocation" placeholder="City, State" style="width:100%;padding:var(--sp-2) var(--sp-3);border-radius:9px;border:1.5px solid #e2e8f0;font-family:var(--sans);font-size:var(--f-sm);color:#0f172a;outline:none;background:#fff" oninput="calc()"/></div>
+    <div class="section-head" style="margin-top:10px">HonorVet Team</div>
+    <div class="fg"><label>Recruiter Name</label><input type="text" class="hp" id="i-recruiterName" placeholder="Recruiter" style="width:100%;padding:var(--sp-2) var(--sp-3);border-radius:9px;border:1.5px solid #e2e8f0;font-family:var(--sans);font-size:var(--f-sm);color:#0f172a;outline:none;background:#fff" oninput="calc()"/></div>
+    <div class="fg"><label>Team Lead (TL)</label><input type="text" class="hp" id="i-tlName" placeholder="Team Lead" style="width:100%;padding:var(--sp-2) var(--sp-3);border-radius:9px;border:1.5px solid #e2e8f0;font-family:var(--sans);font-size:var(--f-sm);color:#0f172a;outline:none;background:#fff" oninput="calc()"/></div>
+    <div class="fg"><label>Delivery Manager (DM)</label><input type="text" class="hp" id="i-dmName" placeholder="Delivery Manager" style="width:100%;padding:var(--sp-2) var(--sp-3);border-radius:9px;border:1.5px solid #e2e8f0;font-family:var(--sans);font-size:var(--f-sm);color:#0f172a;outline:none;background:#fff" oninput="calc()"/></div>
+
+    <div class="fg" style="margin-top:6px"><label>Manual Fee Override</label><div class="iw"><input type="number" class="hs" id="i-manualFee" placeholder="—" step="0.01" oninput="calc()"/><span class="sfx">%</span></div></div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-sw rq"></div>Required</div>
+      <div class="legend-item"><div class="legend-sw df"></div>Default</div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL 2: NURSE PACKAGE -->
+<div class="panel panel-package">
+  <div class="panel-head">
+    <div class="panel-title-ico">👩‍⚕️</div>
+    <div class="panel-title-wrap">
+      <span class="panel-title">Nurse Package</span>
+      <span class="panel-sub">What the nurse receives</span>
+    </div>
+  </div>
+  <div class="panel-body">
+    <div class="fg"><label>W-2 Hourly Rate <span class="dot"></span></label><div class="iw"><span class="pfx">$</span><input type="number" class="hp rq" id="i-w2" value="13" step="0.01" oninput="calc();updateOtStip()"/></div></div>
+
+    <div id="nc-pkg">
+      <div class="section-head">Stipend (Non-Taxable)</div>
+      <div class="tg"><span class="tg-l">Stipend Offered?</span><div class="tg-sw"><button id="b-stip-y" class="on" onclick="tog('stip','Y')">Y</button><button id="b-stip-n" onclick="tog('stip','N')">N</button></div></div>
+      <div id="stip-fields">
+        <div class="fg"><label>Stipend (Hourly) <span class="dot"></span></label><div class="iw"><span class="pfx">$</span><input type="number" class="hp rq" id="i-stipend" value="68.95" step="0.01" oninput="calc();updateOtStip()"/></div></div>
+        <div class="tg"><span class="tg-l">Stipend on OT?</span><div class="tg-sw"><button id="b-stipOT-y" class="on" onclick="tog('stipOT','Y')">Y</button><button id="b-stipOT-n" onclick="tog('stipOT','N')">N</button></div></div>
+        <div id="ot-stip-row">
+          <div class="auto-tile" style="background:#f0fdf4;border-color:#86efac;margin-bottom:4px"><span class="auto-tile-l" style="color:#16a34a">OT Stipend (Auto)</span><span class="auto-tile-v" style="color:#15803d">$<span id="nc-otStip-display">—</span>/hr</span></div>
+          <input type="hidden" id="i-otStipend" value="0"/>
+        </div>
+        <div class="tg"><span class="tg-l">Stipend on Orientation?</span><div class="tg-sw"><button id="b-stipOrient-y" class="on" onclick="tog('stipOrient','Y')">Y</button><button id="b-stipOrient-n" onclick="tog('stipOrient','N')">N</button></div></div>
+      </div>
+      <div class="section-head">One-Time &amp; Benefits</div>
+      <input type="hidden" id="i-medTests" value="300"/>
+      <div style="font-size:var(--f-xs);color:#94a3b8;margin-bottom:var(--sp-1);background:#f8fafc;border-radius:6px;padding:4px 8px;border:1px solid #e2e8f0;display:none">Med Tests: <strong style="color:#475569">$300 included</strong> as fixed cost</div>
+      <div class="fg"><label>Completion Bonus</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-bonus" value="0" step="1" oninput="calc()" placeholder="0"/></div></div>
+      <div class="fg"><label>Other One-Time Reimb.</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-otherReimb" value="0" step="1" oninput="calc()" placeholder="0"/></div></div>
+      <div class="fg"><label>Any Other Payment (one-time $)</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-anyOther" value="0" step="1" oninput="calc()" placeholder="0"/></div></div>
+      <div class="row2">
+        <div class="fg"><label>Med Benefits Bridge Reimb.</label><select id="i-medInsType" onchange="calc()"><option value="No" selected>No</option><option value="Monthly">Monthly</option><option value="Project">Project</option></select></div>
+        <div class="fg"><label>Compensation ($)</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-medInsAmt" value="100" step="1" oninput="calc()"/></div></div>
+      </div>
+      <div class="tg"><span class="tg-l">Candidate Health Insurance?</span><div class="tg-sw"><button id="b-candIns-y" onclick="tog('candIns','Y')">Y</button><button id="b-candIns-n" class="off" onclick="tog('candIns','N')">N</button></div></div>
+      <div class="tg"><span class="tg-l">Vivian Hire? <span id="vivian-status" style="font-size:var(--f-xs);font-weight:800;color:#94a3b8;margin-left:4px">adds $3+/hr cost</span></span><div class="tg-sw"><button id="b-vivian-y" onclick="tog('vivian','Y')">Y</button><button id="b-vivian-n" class="off" onclick="tog('vivian','N')">N</button></div></div>
+    </div>
+
+    <div id="cal-pkg" style="display:none">
+      <div class="section-head">Stipend</div>
+      <div class="fg"><label>Stipend (Hourly) <span class="dot"></span></label><div class="iw"><span class="pfx">$</span><input type="number" class="hp rq" id="i-calStipend" value="51" step="0.01" oninput="calc()"/></div></div>
+      <div class="section-head">One-Time &amp; Benefits</div>
+      <input type="hidden" id="i-calMedTests" value="300"/>
+      <div style="font-size:var(--f-xs);color:#94a3b8;margin-bottom:var(--sp-1);background:#f8fafc;border-radius:6px;padding:4px 8px;border:1px solid #e2e8f0;display:none">Med Tests: <strong style="color:#475569">$300 included</strong> as fixed cost</div>
+      <div class="fg"><label>Completion Bonus</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-calBonus" value="0" step="1" oninput="calc()" placeholder="0"/></div></div>
+      <div class="fg"><label>Other One-Time Reimb.</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-calOtherReimb" value="0" step="1" oninput="calc()" placeholder="0"/></div></div>
+      <div class="fg"><label>Any Other Payment (one-time $)</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-calAnyOther" value="0" step="1" oninput="calc()" placeholder="0"/></div></div>
+      <div class="row2">
+        <div class="fg"><label>Med Benefits Bridge Reimb.</label><select id="i-calMedInsType" onchange="calc()"><option value="No" selected>No</option><option value="Monthly">Monthly</option><option value="Project">Project</option></select></div>
+        <div class="fg"><label>Compensation ($)</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-calMedInsAmt" value="100" step="1" oninput="calc()"/></div></div>
+      </div>
+      <div class="tg"><span class="tg-l">Vivian Hire?</span><div class="tg-sw"><button id="b-calVivian-y" class="on" onclick="tog('calVivian','Y')">Y</button><button id="b-calVivian-n" onclick="tog('calVivian','N')">N</button></div></div>
+    </div>
+
+    <div id="ogs-pkg" style="display:none">
+      <div class="section-head">Stipend</div>
+      <div class="fg"><label>Stipend (Hourly) <span class="dot"></span></label><div class="iw"><span class="pfx">$</span><input type="number" class="hp rq" id="i-ogsStipend" value="52" step="0.01" oninput="calc()"/></div></div>
+      <div class="section-head">One-Time</div>
+      <div class="row2"><div class="fg"><label>Flight/Completion</label><div class="iw"><span class="pfx">$</span><input type="hidden" id="i-housing" value="0"/><input type="hidden" id="i-meals" value="0"/><input type="number" class="hp" id="i-flight" value="0" step="1" oninput="calc()"/></div></div><div class="fg"><label>Med Tests</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-ogsMedTests" value="0" step="1" oninput="calc()"/></div></div></div>
+      <div class="section-head">Auto-Calculated</div>
+      <div class="auto-tile"><span class="auto-tile-l">PTO (4.65%)</span><span class="auto-tile-v">$<span id="o-pto">—</span>/hr</span></div>
+      <div class="auto-tile"><span class="auto-tile-l">W-2 Net</span><span class="auto-tile-v">$<span id="o-w2net">—</span>/hr</span></div>
+      <div class="auto-tile"><span class="auto-tile-l">Vivian Fee</span><span class="auto-tile-v">$<span id="o-viv">—</span>/hr</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL 3: RESULTS -->
+<div class="panel panel-results">
+  <div class="panel-head">
+    <div class="panel-title-ico">📊</div>
+    <div class="panel-title-wrap">
+      <span class="panel-title">Live Results</span>
+      <span class="panel-sub">Updates as you type</span>
+    </div>
+  </div>
+  <div class="results-body" id="results-area"></div>
+</div>
+
+<!-- GUIDE -->
+<div class="alt-view guide">
+<div class="guide"><div class="guide-inner">
+<div class="g-title">How to Use This Calculator</div>
+<div class="g-sub">A complete guide for new recruiters. Read this once and you will understand exactly how nurse staffing economics work and how to use every part of this tool.</div>
+
+<div class="g-section">
+<div class="g-h">Layout Overview</div>
+<div class="g-p">The calculator uses a <strong>two-column layout</strong>. The left panel holds all your inputs — bill rate, hours, W2, stipend, toggles. The right panel shows results that <strong>update instantly</strong> as you type. There are no "Calculate" buttons — everything is live.</div>
+<div class="g-grid">
+<div class="g-card"><div class="g-icon">💰</div><div class="g-card-t">Left Panel — Inputs</div><div class="g-card-d">Billing section first (bill rate, MSP fee, hours, weeks, client picker), then Nurse Package (W-2, stipend, benefits, toggles). Scroll to see all fields.</div></div>
+<div class="g-card"><div class="g-icon">📊</div><div class="g-card-t">Right Panel — Results</div><div class="g-card-d">Hourly profit margin (green or red), project billing total, blended rate, hourly breakdown, and weekly breakdown. Live-updates as you change inputs.</div></div>
+<div class="g-card"><div class="g-icon">🧮</div><div class="g-card-t">Top Tabs — Mode</div><div class="g-card-d">Switch between Standard, California OT, and OGS Nurse calculation modes. Each has different formulas and field requirements.</div></div>
+<div class="g-card"><div class="g-icon">🕒</div><div class="g-card-t">History (Auto-Saved)</div><div class="g-card-d">Every calculation is automatically saved for 7 days. Click the History tab to review past packages and reload any one back into the calculator.</div></div>
+</div>
+</div>
+
+<div class="g-section">
+<div class="g-h">The Foundation — Bill Rate Driven Accounts</div>
+<div class="g-p">Every deal starts with one number: the <strong>bill rate</strong>. This is the hourly amount a hospital pays HonorVet for placing a nurse. From that single number, you decide how much to pay the nurse and what's left as profit. The math runs in this order:</div>
+<table class="g-table">
+<tr><th>Step</th><th>Calculation</th><th>Example</th></tr>
+<tr><td>Bill rate</td><td>What the hospital pays</td><td class="m">$85.00/hr</td></tr>
+<tr><td>MSP fee taken</td><td>Staffing marketplace cut (3-7%)</td><td class="m">−$5.53 (6.5%)</td></tr>
+<tr><td>Net bill rate</td><td>What HonorVet keeps after MSP</td><td class="m">$79.48/hr</td></tr>
+<tr><td>Pay the nurse</td><td>W2 + overhead + stipend</td><td class="m">−$61.41/hr</td></tr>
+<tr class="win"><td><strong>Profit margin</strong></td><td><strong>What remains</strong></td><td class="m"><strong>$18.06/hr</strong></td></tr>
+</table>
+</div>
+
+<div class="g-section">
+<div class="g-h">Why W2 + Per Diem? (The Core Concept)</div>
+<div class="g-p">There are two ways to pay a nurse, and the difference matters enormously. <strong>W2 Only</strong> means the entire compensation is taxable wages. <strong>W2 + Per Diem</strong> means a smaller W2 wage plus a non-taxable stipend for housing, meals, and incidentals. The W2 + Per Diem model is better for everyone — here's why:</div>
+<table class="g-table">
+<tr><th>Cost Component</th><th>W2 Only</th><th>W2 + Per Diem</th></tr>
+<tr><td>W2 Compensation</td><td class="m">$54.81/hr</td><td class="m">$20.00/hr</td></tr>
+<tr><td>Overhead % (only on W2)</td><td class="m">25%</td><td class="m">33%</td></tr>
+<tr><td>Overhead in Dollars</td><td class="m">$13.70</td><td class="m">$6.60</td></tr>
+<tr><td>Per Diem (Non-Taxable)</td><td class="m">$0.00</td><td class="m">$34.81</td></tr>
+<tr><td>Total Cost to Company</td><td class="m">$68.51</td><td class="m">$61.41</td></tr>
+<tr class="win"><td><strong>Gross Profit/hr</strong></td><td class="m"><strong>$10.96</strong></td><td class="m"><strong>$18.06</strong></td></tr>
+</table>
+<div class="g-callout"><strong>Why this works:</strong> Overhead (payroll taxes, insurance, workers comp) only applies to the W2 portion. Even though the overhead percentage is higher (33% vs 25%), 33% of $20 is far less than 25% of $54. The stipend portion passes through with zero overhead. <strong>The nurse also wins</strong> — they take home about $10/hr more because the stipend is never taxed.</div>
+</div>
+
+<div class="g-section">
+<div class="g-h">Loading Factor (Overhead)</div>
+<div class="g-p">The loading factor represents the real cost of employing someone beyond their W2 wage. It includes payroll taxes (Social Security, Medicare, FUTA, SUTA), workers compensation insurance, general liability insurance, health/dental/vision benefits, and 401K matching.</div>
+<table class="g-table">
+<tr><th>W2 Rate</th><th>Loading Factor</th><th>What It Means</th></tr>
+<tr><td>Below $30/hr</td><td class="m">1.33 (33% overhead)</td><td>Every $1 of W2 costs the company $1.33</td></tr>
+<tr><td>$30/hr and above</td><td class="m">1.25 (25% overhead)</td><td>Every $1 of W2 costs the company $1.25</td></tr>
+</table>
+</div>
+
+<div class="g-section">
+<div class="g-h">Which Tab Should I Use?</div>
+<div class="g-p"><strong>Standard (Non-CA):</strong> Use for all states except California. This is the most common tab. Supports toggling stipend on/off for OT hours and orientation hours. Allows a separate OT stipend rate.</div>
+<div class="g-p"><strong>California OT:</strong> California has unique overtime laws. Stipend automatically applies to all hours — there is no toggle. The Vivian fee formula differs slightly (includes OT hours in the denominator).</div>
+<div class="g-p"><strong>OGS Nurse:</strong> For OGS government contracts. Housing and meals are entered as daily amounts. PTO automatically calculated at 4.65% of W2. Fixed 1.25 loading factor. Vivian fee always included.</div>
+</div>
+
+<div class="g-section">
+<div class="g-h">Tips for New Recruiters</div>
+<div class="g-tips">
+<div class="g-tip"><strong>Check the margin first.</strong> Above $10/hr is healthy. $5-10/hr is thin but workable. Below $5/hr is risky.</div>
+<div class="g-tip"><strong>Keep W-2 low.</strong> $13-$20/hr is typical. Lower W2 means less overhead and more margin.</div>
+<div class="g-tip"><strong>Orange fields are required</strong> for every deal. Gray fields are pre-filled defaults.</div>
+<div class="g-tip"><strong>Vivian adds $2-3/hr cost.</strong> Direct sourcing saves that amount of margin.</div>
+<div class="g-tip"><strong>Present Weekly Gross</strong> to the nurse. That's the number they care about most.</div>
+<div class="g-tip"><strong>Use History tab</strong> to compare similar past packages and stay consistent.</div>
+</div>
+<div class="g-warn"><strong>If margin turns red, the deal loses money on every hour worked.</strong> Either reduce the nurse package, negotiate a higher bill rate, or walk away from the deal.</div>
+</div>
+
+</div></div>
+</div>
+
+<!-- HISTORY -->
+<div class="alt-view history">
+<div class="history"><div class="h-inner">
+<div class="h-head"><div class="h-title">Recent Packages</div><button class="h-clear" onclick="clearHist()">Clear All</button></div>
+<div class="h-sub">Calculations from the last 7 days are saved automatically. Click any entry to expand details, then load it back into the calculator.</div>
+<div id="hist-list"></div>
+</div></div>
+</div>
+
+</div>
+
+<div class="ft">HonorVet Technologies · <b>Internal Use Only</b> · <span id='app-version-footer'>v4.0</span></div>
+
+
+<script>
+window._HONORVET_TEMPLATE_B64='UEsDBBQAAAAAAApt8VxGx01IzQAAAM0AAAAQAAAAZG9jUHJvcHMvYXBwLnhtbDxQcm9wZXJ0aWVzIHhtbG5zPSJodHRwOi8vc2NoZW1hcy5vcGVueG1sZm9ybWF0cy5vcmcvb2ZmaWNlRG9jdW1lbnQvMjAwNi9leHRlbmRlZC1wcm9wZXJ0aWVzIj48QXBwbGljYXRpb24+TWljcm9zb2Z0IEV4Y2VsIENvbXBhdGlibGUgLyBPcGVucHl4bCAzLjEuNTwvQXBwbGljYXRpb24+PEFwcFZlcnNpb24+My4xPC9BcHBWZXJzaW9uPjwvUHJvcGVydGllcz5QSwMEFAAAAAAACm3xXAcsVYorAgAAKwIAABEAAABkb2NQcm9wcy9jb3JlLnhtbDxjcDpjb3JlUHJvcGVydGllcyB4bWxuczpjcD0iaHR0cDovL3NjaGVtYXMub3BlbnhtbGZvcm1hdHMub3JnL3BhY2thZ2UvMjAwNi9tZXRhZGF0YS9jb3JlLXByb3BlcnRpZXMiPjxkYzpjcmVhdG9yIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyI+b3BlbnB5eGw8L2RjOmNyZWF0b3I+PGRjdGVybXM6Y3JlYXRlZCB4bWxuczpkY3Rlcm1zPSJodHRwOi8vcHVybC5vcmcvZGMvdGVybXMvIiB4bWxuczp4c2k9Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvWE1MU2NoZW1hLWluc3RhbmNlIiB4c2k6dHlwZT0iZGN0ZXJtczpXM0NEVEYiPjIwMjYtMDctMTdUMTM6NDA6MjFaPC9kY3Rlcm1zOmNyZWF0ZWQ+PGRjdGVybXM6bW9kaWZpZWQgeG1sbnM6ZGN0ZXJtcz0iaHR0cDovL3B1cmwub3JnL2RjL3Rlcm1zLyIgeG1sbnM6eHNpPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxL1hNTFNjaGVtYS1pbnN0YW5jZSIgeHNpOnR5cGU9ImRjdGVybXM6VzNDRFRGIj4yMDI2LTA3LTE3VDEzOjQwOjIxWjwvZGN0ZXJtczptb2RpZmllZD48L2NwOmNvcmVQcm9wZXJ0aWVzPlBLAwQUAAAAAAAKbfFcmVycI5wnAACcJwAAEwAAAHhsL3RoZW1lL3RoZW1lMS54bWw8P3htbCB2ZXJzaW9uPSIxLjAiPz4KPGE6dGhlbWUgeG1sbnM6YT0iaHR0cDovL3NjaGVtYXMub3BlbnhtbGZvcm1hdHMub3JnL2RyYXdpbmdtbC8yMDA2L21haW4iIG5hbWU9Ik9mZmljZSBUaGVtZSI+CiAgPGE6dGhlbWVFbGVtZW50cz4KICAgIDxhOmNsclNjaGVtZSBuYW1lPSJPZmZpY2UiPgogICAgICA8YTpkazE+CiAgICAgICAgPGE6c3lzQ2xyIHZhbD0id2luZG93VGV4dCIgbGFzdENscj0iMDAwMDAwIi8+CiAgICAgIDwvYTpkazE+CiAgICAgIDxhOmx0MT4KICAgICAgICA8YTpzeXNDbHIgdmFsPSJ3aW5kb3ciIGxhc3RDbHI9IkZGRkZGRiIvPgogICAgICA8L2E6bHQxPgogICAgICA8YTpkazI+CiAgICAgICAgPGE6c3JnYkNsciB2YWw9IjFGNDk3RCIvPgogICAgICA8L2E6ZGsyPgogICAgICA8YTpsdDI+CiAgICAgICAgPGE6c3JnYkNsciB2YWw9IkVFRUNFMSIvPgogICAgICA8L2E6bHQyPgogICAgICA8YTphY2NlbnQxPgogICAgICAgIDxhOnNyZ2JDbHIgdmFsPSI0RjgxQkQiLz4KICAgICAgPC9hOmFjY2VudDE+CiAgICAgIDxhOmFjY2VudDI+CiAgICAgICAgPGE6c3JnYkNsciB2YWw9IkMwNTA0RCIvPgogICAgICA8L2E6YWNjZW50Mj4KICAgICAgPGE6YWNjZW50Mz4KICAgICAgICA8YTpzcmdiQ2xyIHZhbD0iOUJCQjU5Ii8+CiAgICAgIDwvYTphY2NlbnQzPgogICAgICA8YTphY2NlbnQ0PgogICAgICAgIDxhOnNyZ2JDbHIgdmFsPSI4MDY0QTIiLz4KICAgICAgPC9hOmFjY2VudDQ+CiAgICAgIDxhOmFjY2VudDU+CiAgICAgICAgPGE6c3JnYkNsciB2YWw9IjRCQUNDNiIvPgogICAgICA8L2E6YWNjZW50NT4KICAgICAgPGE6YWNjZW50Nj4KICAgICAgICA8YTpzcmdiQ2xyIHZhbD0iRjc5NjQ2Ii8+CiAgICAgIDwvYTphY2NlbnQ2PgogICAgICA8YTpobGluaz4KICAgICAgICA8YTpzcmdiQ2xyIHZhbD0iMDAwMEZGIi8+CiAgICAgIDwvYTpobGluaz4KICAgICAgPGE6Zm9sSGxpbms+CiAgICAgICAgPGE6c3JnYkNsciB2YWw9IjgwMDA4MCIvPgogICAgICA8L2E6Zm9sSGxpbms+CiAgICA8L2E6Y2xyU2NoZW1lPgogICAgPGE6Zm9udFNjaGVtZSBuYW1lPSJPZmZpY2UiPgogICAgICA8YTptYWpvckZvbnQ+CiAgICAgICAgPGE6bGF0aW4gdHlwZWZhY2U9IkNhbWJyaWEiLz4KICAgICAgICA8YTplYSB0eXBlZmFjZT0iIi8+CiAgICAgICAgPGE6Y3MgdHlwZWZhY2U9IiIvPgogICAgICAgIDxhOmZvbnQgc2NyaXB0PSJKcGFuIiB0eXBlZmFjZT0iJiN4RkYyRDsmI3hGRjMzOyAmI3hGRjMwOyYjeDMwQjQ7JiN4MzBCNzsmI3gzMEMzOyYjeDMwQUY7Ii8+CiAgICAgICAgPGE6Zm9udCBzY3JpcHQ9IkhhbmciIHR5cGVmYWNlPSImI3hCOUQxOyYjeEM3NDA7ICYjeEFDRTA7JiN4QjUxNTsiLz4KICAgICAgICA8YTpmb250IHNjcmlwdD0iSGFucyIgdHlwZWZhY2U9IiYjeDVCOEI7JiN4NEY1MzsiLz4KICAgICAgICA8YTpmb250IHNjcmlwdD0iSGFudCIgdHlwZWZhY2U9IiYjeDY1QjA7JiN4N0QzMDsmI3g2NjBFOyYjeDlBRDQ7Ii8+CiAgICAgICAgPGE6Zm9udCBzY3JpcHQ9IkFyYWIiIHR5cGVmYWNlPSJUaW1lcyBOZXcgUm9tYW4iLz4KICAgICAgICA8YTpmb250IHNjcmlwdD0iSGViciIgdHlwZWZhY2U9IlRpbWVzIE5ldyBSb21hbiIvPgogICAgICAgIDxhOmZvbnQgc2NyaXB0PSJUaGFpIiB0eXBlZmFjZT0iVGFob21hIi8+CiAgICAgICAgPGE6Zm9udCBzY3JpcHQ9IkV0aGkiIHR5cGVmYWNlPSJOeWFsYSIvPgogICAgICAgIDxhOmZvbnQgc2NyaXB0PSJCZW5nIiB0eXBlZmFjZT0iVnJpbmRhIi8+CiAgICAgICAgPGE6Zm9udCBzY3JpcHQ9Ikd1anIiIHR5cGVmYWNlPSJTaHJ1dGkiLz4KICAgICAgICA8YTpmb250IHNjcmlwdD0iS2htciIgdHlwZWZhY2U9Ik1vb2xCb3JhbiIvPgogICAgICAgIDxhOmZvbnQgc2NyaXB0PSJLbmRhIiB0eXBlZmFjZT0iVHVuZ2EiLz4KICAgICAgICA8YTpmb250IHNjcmlwdD0iR3VydSIgdHlwZWZhY2U9IlJhYXZpIi8+CiAgICAgICAgPGE6Zm9udCBzY3JpcHQ9IkNhbnMiIHR5cGVmYWNlPSJFdXBoZW1pYSIvPgogICAgICAgIDxhOmZvbnQgc2NyaXB0PSJDaGVyIiB0eXBlZmFjZT0iUGxhbnRhZ2VuZXQgQ2hlcm9rZWUiLz4KICAgICAgICA8YTpmb250IHNjcmlwdD0iWWlpaSIgdHlwZWZhY2U9Ik1pY3Jvc29mdCBZaSBCYWl0aSIvPgogICAgICAgIDxhOmZvbnQgc2NyaXB0PSJUaWJ0IiB0eXBlZmFjZT0iTWljcm9zb2Z0IEhpbWFsYXlhIi8+CiAgICAgICAgPGE6Zm9udCBzY3JpcHQ9IlRoYWEiIHR5cGVmYWNlPSJNViBCb2xpIi8+CiAgICAgICAgPGE6Zm9udCBzY3JpcHQ9IkRldmEiIHR5cGVmYWNlPSJNYW5nYWwiLz4KICAgICAgICA8YTpmb250IHNjcmlwdD0iVGVsdSIgdHlwZWZhY2U9IkdhdXRhbWkiLz4KICAgICAgICA8YTpmb250IHNjcmlwdD0iVGFtbCIgdHlwZWZhY2U9IkxhdGhhIi8+CiAgICAgICAgPGE6Zm9udCBzY3JpcHQ9IlN5cmMiIHR5cGVmYWNlPSJFc3RyYW5nZWxvIEVkZXNzYSIvPgogICAgICAgIDxhOmZvbnQgc2NyaXB0PSJPcnlhIiB0eXBlZmFjZT0iS2FsaW5nYSIvPgogICAgICAgIDxhOmZvbnQgc2NyaXB0PSJNbHltIiB0eXBlZmFjZT0iS2FydGlrYSIvPgogICAgICAgIDxhOmZvbnQgc2NyaXB0PSJMYW9vIiB0eXBlZmFjZT0iRG9rQ2hhbXBhIi8+CiAgICAgICAgPGE6Zm9udCBzY3JpcHQ9IlNpbmgiIHR5cGVmYWNlPSJJc2tvb2xhIFBvdGEiLz4KICAgICAgICA8YTpmb250IHNjcmlwdD0iTW9uZyIgdHlwZWZhY2U9Ik1vbmdvbGlhbiBCYWl0aSIvPgogICAgICAgIDxhOmZvbnQgc2NyaXB0PSJWaWV0IiB0eXBlZmFjZT0iVGltZXMgTmV3IFJvbWFuIi8+CiAgICAgICAgPGE6Zm9udCBzY3JpcHQ9IlVpZ2giIHR5cGVmYWNlPSJNaWNyb3NvZnQgVWlnaHVyIi8+CiAgICAgIDwvYTptYWpvckZvbnQ+CiAgICAgIDxhOm1pbm9yRm9udD4KICAgICAgICA8YTpsYXRpbiB0eXBlZmFjZT0iQ2FsaWJyaSIvPgogICAgICAgIDxhOmVhIHR5cGVmYWNlPSIiLz4KICAgICAgICA8YTpjcyB0eXBlZmFjZT0iIi8+CiAgICAgICAgPGE6Zm9udCBzY3JpcHQ9IkpwYW4iIHR5cGVmYWNlPSImI3hGRjJEOyYjeEZGMzM7ICYjeEZGMzA7JiN4MzBCNDsmI3gzMEI3OyYjeDMwQzM7JiN4MzBBRjsiLz4KICAgICAgICA8YTpmb250IHNjcmlwdD0iSGFuZyIgdHlwZWZhY2U9IiYjeEI5RDE7JiN4Qzc0MDsgJiN4QUNFMDsmI3hCNTE1OyIvPgogICAgICAgIDxhOmZvbnQgc2NyaXB0PSJIYW5zIiB0eXBlZmFjZT0iJiN4NUI4QjsmI3g0RjUzOyIvPgogICAgICAgIDxhOmZvbnQgc2NyaXB0PSJIYW50IiB0eXBlZmFjZT0iJiN4NjVCMDsmI3g3RDMwOyYjeDY2MEU7JiN4OUFENDsiLz4KICAgICAgICA8YTpmb250IHNjcmlwdD0iQXJhYiIgdHlwZWZhY2U9IkFyaWFsIi8+CiAgICAgICAgPGE6Zm9udCBzY3JpcHQ9IkhlYnIiIHR5cGVmYWNlPSJBcmlhbCIvPgogICAgICAgIDxhOmZvbnQgc2NyaXB0PSJUaGFpIiB0eXBlZmFjZT0iVGFob21hIi8+CiAgICAgICAgPGE6Zm9udCBzY3JpcHQ9IkV0aGkiIHR5cGVmYWNlPSJOeWFsYSIvPgogICAgICAgIDxhOmZvbnQgc2NyaXB0PSJCZW5nIiB0eXBlZmFjZT0iVnJpbmRhIi8+CiAgICAgICAgPGE6Zm9udCBzY3JpcHQ9Ikd1anIiIHR5cGVmYWNlPSJTaHJ1dGkiLz4KICAgICAgICA8YTpmb250IHNjcmlwdD0iS2htciIgdHlwZWZhY2U9IkRhdW5QZW5oIi8+CiAgICAgICAgPGE6Zm9udCBzY3JpcHQ9IktuZGEiIHR5cGVmYWNlPSJUdW5nYSIvPgogICAgICAgIDxhOmZvbnQgc2NyaXB0PSJHdXJ1IiB0eXBlZmFjZT0iUmFhdmkiLz4KICAgICAgICA8YTpmb250IHNjcmlwdD0iQ2FucyIgdHlwZWZhY2U9IkV1cGhlbWlhIi8+CiAgICAgICAgPGE6Zm9udCBzY3JpcHQ9IkNoZXIiIHR5cGVmYWNlPSJQbGFudGFnZW5ldCBDaGVyb2tlZSIvPgogICAgICAgIDxhOmZvbnQgc2NyaXB0PSJZaWlpIiB0eXBlZmFjZT0iTWljcm9zb2Z0IFlpIEJhaXRpIi8+CiAgICAgICAgPGE6Zm9udCBzY3JpcHQ9IlRpYnQiIHR5cGVmYWNlPSJNaWNyb3NvZnQgSGltYWxheWEiLz4KICAgICAgICA8YTpmb250IHNjcmlwdD0iVGhhYSIgdHlwZWZhY2U9Ik1WIEJvbGkiLz4KICAgICAgICA8YTpmb250IHNjcmlwdD0iRGV2YSIgdHlwZWZhY2U9Ik1hbmdhbCIvPgogICAgICAgIDxhOmZvbnQgc2NyaXB0PSJUZWx1IiB0eXBlZmFjZT0iR2F1dGFtaSIvPgogICAgICAgIDxhOmZvbnQgc2NyaXB0PSJUYW1sIiB0eXBlZmFjZT0iTGF0aGEiLz4KICAgICAgICA8YTpmb250IHNjcmlwdD0iU3lyYyIgdHlwZWZhY2U9IkVzdHJhbmdlbG8gRWRlc3NhIi8+CiAgICAgICAgPGE6Zm9udCBzY3JpcHQ9Ik9yeWEiIHR5cGVmYWNlPSJLYWxpbmdhIi8+CiAgICAgICAgPGE6Zm9udCBzY3JpcHQ9Ik1seW0iIHR5cGVmYWNlPSJLYXJ0aWthIi8+CiAgICAgICAgPGE6Zm9udCBzY3JpcHQ9Ikxhb28iIHR5cGVmYWNlPSJEb2tDaGFtcGEiLz4KICAgICAgICA8YTpmb250IHNjcmlwdD0iU2luaCIgdHlwZWZhY2U9Iklza29vbGEgUG90YSIvPgogICAgICAgIDxhOmZvbnQgc2NyaXB0PSJNb25nIiB0eXBlZmFjZT0iTW9uZ29saWFuIEJhaXRpIi8+CiAgICAgICAgPGE6Zm9udCBzY3JpcHQ9IlZpZXQiIHR5cGVmYWNlPSJBcmlhbCIvPgogICAgICAgIDxhOmZvbnQgc2NyaXB0PSJVaWdoIiB0eXBlZmFjZT0iTWljcm9zb2Z0IFVpZ2h1ciIvPgogICAgICA8L2E6bWlub3JGb250PgogICAgPC9hOmZvbnRTY2hlbWU+CiAgICA8YTpmbXRTY2hlbWUgbmFtZT0iT2ZmaWNlIj4KICAgICAgPGE6ZmlsbFN0eWxlTHN0PgogICAgICAgIDxhOnNvbGlkRmlsbD4KICAgICAgICAgIDxhOnNjaGVtZUNsciB2YWw9InBoQ2xyIi8+CiAgICAgICAgPC9hOnNvbGlkRmlsbD4KICAgICAgICA8YTpncmFkRmlsbCByb3RXaXRoU2hhcGU9IjEiPgogICAgICAgICAgPGE6Z3NMc3Q+CiAgICAgICAgICAgIDxhOmdzIHBvcz0iMCI+CiAgICAgICAgICAgICAgPGE6c2NoZW1lQ2xyIHZhbD0icGhDbHIiPgogICAgICAgICAgICAgICAgPGE6dGludCB2YWw9IjUwMDAwIi8+CiAgICAgICAgICAgICAgICA8YTpzYXRNb2QgdmFsPSIzMDAwMDAiLz4KICAgICAgICAgICAgICA8L2E6c2NoZW1lQ2xyPgogICAgICAgICAgICA8L2E6Z3M+CiAgICAgICAgICAgIDxhOmdzIHBvcz0iMzUwMDAiPgogICAgICAgICAgICAgIDxhOnNjaGVtZUNsciB2YWw9InBoQ2xyIj4KICAgICAgICAgICAgICAgIDxhOnRpbnQgdmFsPSIzNzAwMCIvPgogICAgICAgICAgICAgICAgPGE6c2F0TW9kIHZhbD0iMzAwMDAwIi8+CiAgICAgICAgICAgICAgPC9hOnNjaGVtZUNscj4KICAgICAgICAgICAgPC9hOmdzPgogICAgICAgICAgICA8YTpncyBwb3M9IjEwMDAwMCI+CiAgICAgICAgICAgICAgPGE6c2NoZW1lQ2xyIHZhbD0icGhDbHIiPgogICAgICAgICAgICAgICAgPGE6dGludCB2YWw9IjE1MDAwIi8+CiAgICAgICAgICAgICAgICA8YTpzYXRNb2QgdmFsPSIzNTAwMDAiLz4KICAgICAgICAgICAgICA8L2E6c2NoZW1lQ2xyPgogICAgICAgICAgICA8L2E6Z3M+CiAgICAgICAgICA8L2E6Z3NMc3Q+CiAgICAgICAgICA8YTpsaW4gYW5nPSIxNjIwMDAwMCIgc2NhbGVkPSIxIi8+CiAgICAgICAgPC9hOmdyYWRGaWxsPgogICAgICAgIDxhOmdyYWRGaWxsIHJvdFdpdGhTaGFwZT0iMSI+CiAgICAgICAgICA8YTpnc0xzdD4KICAgICAgICAgICAgPGE6Z3MgcG9zPSIwIj4KICAgICAgICAgICAgICA8YTpzY2hlbWVDbHIgdmFsPSJwaENsciI+CiAgICAgICAgICAgICAgICA8YTpzaGFkZSB2YWw9IjUxMDAwIi8+CiAgICAgICAgICAgICAgICA8YTpzYXRNb2QgdmFsPSIxMzAwMDAiLz4KICAgICAgICAgICAgICA8L2E6c2NoZW1lQ2xyPgogICAgICAgICAgICA8L2E6Z3M+CiAgICAgICAgICAgIDxhOmdzIHBvcz0iODAwMDAiPgogICAgICAgICAgICAgIDxhOnNjaGVtZUNsciB2YWw9InBoQ2xyIj4KICAgICAgICAgICAgICAgIDxhOnNoYWRlIHZhbD0iOTMwMDAiLz4KICAgICAgICAgICAgICAgIDxhOnNhdE1vZCB2YWw9IjEzMDAwMCIvPgogICAgICAgICAgICAgIDwvYTpzY2hlbWVDbHI+CiAgICAgICAgICAgIDwvYTpncz4KICAgICAgICAgICAgPGE6Z3MgcG9zPSIxMDAwMDAiPgogICAgICAgICAgICAgIDxhOnNjaGVtZUNsciB2YWw9InBoQ2xyIj4KICAgICAgICAgICAgICAgIDxhOnNoYWRlIHZhbD0iOTQwMDAiLz4KICAgICAgICAgICAgICAgIDxhOnNhdE1vZCB2YWw9IjEzNTAwMCIvPgogICAgICAgICAgICAgIDwvYTpzY2hlbWVDbHI+CiAgICAgICAgICAgIDwvYTpncz4KICAgICAgICAgIDwvYTpnc0xzdD4KICAgICAgICAgIDxhOmxpbiBhbmc9IjE2MjAwMDAwIiBzY2FsZWQ9IjAiLz4KICAgICAgICA8L2E6Z3JhZEZpbGw+CiAgICAgIDwvYTpmaWxsU3R5bGVMc3Q+CiAgICAgIDxhOmxuU3R5bGVMc3Q+CiAgICAgICAgPGE6bG4gdz0iOTUyNSIgY2FwPSJmbGF0IiBjbXBkPSJzbmciIGFsZ249ImN0ciI+CiAgICAgICAgICA8YTpzb2xpZEZpbGw+CiAgICAgICAgICAgIDxhOnNjaGVtZUNsciB2YWw9InBoQ2xyIj4KICAgICAgICAgICAgICA8YTpzaGFkZSB2YWw9Ijk1MDAwIi8+CiAgICAgICAgICAgICAgPGE6c2F0TW9kIHZhbD0iMTA1MDAwIi8+CiAgICAgICAgICAgIDwvYTpzY2hlbWVDbHI+CiAgICAgICAgICA8L2E6c29saWRGaWxsPgogICAgICAgICAgPGE6cHJzdERhc2ggdmFsPSJzb2xpZCIvPgogICAgICAgIDwvYTpsbj4KICAgICAgICA8YTpsbiB3PSIyNTQwMCIgY2FwPSJmbGF0IiBjbXBkPSJzbmciIGFsZ249ImN0ciI+CiAgICAgICAgICA8YTpzb2xpZEZpbGw+CiAgICAgICAgICAgIDxhOnNjaGVtZUNsciB2YWw9InBoQ2xyIi8+CiAgICAgICAgICA8L2E6c29saWRGaWxsPgogICAgICAgICAgPGE6cHJzdERhc2ggdmFsPSJzb2xpZCIvPgogICAgICAgIDwvYTpsbj4KICAgICAgICA8YTpsbiB3PSIzODEwMCIgY2FwPSJmbGF0IiBjbXBkPSJzbmciIGFsZ249ImN0ciI+CiAgICAgICAgICA8YTpzb2xpZEZpbGw+CiAgICAgICAgICAgIDxhOnNjaGVtZUNsciB2YWw9InBoQ2xyIi8+CiAgICAgICAgICA8L2E6c29saWRGaWxsPgogICAgICAgICAgPGE6cHJzdERhc2ggdmFsPSJzb2xpZCIvPgogICAgICAgIDwvYTpsbj4KICAgICAgPC9hOmxuU3R5bGVMc3Q+CiAgICAgIDxhOmVmZmVjdFN0eWxlTHN0PgogICAgICAgIDxhOmVmZmVjdFN0eWxlPgogICAgICAgICAgPGE6ZWZmZWN0THN0PgogICAgICAgICAgICA8YTpvdXRlclNoZHcgYmx1clJhZD0iNDAwMDAiIGRpc3Q9IjIwMDAwIiBkaXI9IjU0MDAwMDAiIHJvdFdpdGhTaGFwZT0iMCI+CiAgICAgICAgICAgICAgPGE6c3JnYkNsciB2YWw9IjAwMDAwMCI+CiAgICAgICAgICAgICAgICA8YTphbHBoYSB2YWw9IjM4MDAwIi8+CiAgICAgICAgICAgICAgPC9hOnNyZ2JDbHI+CiAgICAgICAgICAgIDwvYTpvdXRlclNoZHc+CiAgICAgICAgICA8L2E6ZWZmZWN0THN0PgogICAgICAgIDwvYTplZmZlY3RTdHlsZT4KICAgICAgICA8YTplZmZlY3RTdHlsZT4KICAgICAgICAgIDxhOmVmZmVjdExzdD4KICAgICAgICAgICAgPGE6b3V0ZXJTaGR3IGJsdXJSYWQ9IjQwMDAwIiBkaXN0PSIyMzAwMCIgZGlyPSI1NDAwMDAwIiByb3RXaXRoU2hhcGU9IjAiPgogICAgICAgICAgICAgIDxhOnNyZ2JDbHIgdmFsPSIwMDAwMDAiPgogICAgICAgICAgICAgICAgPGE6YWxwaGEgdmFsPSIzNTAwMCIvPgogICAgICAgICAgICAgIDwvYTpzcmdiQ2xyPgogICAgICAgICAgICA8L2E6b3V0ZXJTaGR3PgogICAgICAgICAgPC9hOmVmZmVjdExzdD4KICAgICAgICA8L2E6ZWZmZWN0U3R5bGU+CiAgICAgICAgPGE6ZWZmZWN0U3R5bGU+CiAgICAgICAgICA8YTplZmZlY3RMc3Q+CiAgICAgICAgICAgIDxhOm91dGVyU2hkdyBibHVyUmFkPSI0MDAwMCIgZGlzdD0iMjMwMDAiIGRpcj0iNTQwMDAwMCIgcm90V2l0aFNoYXBlPSIwIj4KICAgICAgICAgICAgICA8YTpzcmdiQ2xyIHZhbD0iMDAwMDAwIj4KICAgICAgICAgICAgICAgIDxhOmFscGhhIHZhbD0iMzUwMDAiLz4KICAgICAgICAgICAgICA8L2E6c3JnYkNscj4KICAgICAgICAgICAgPC9hOm91dGVyU2hkdz4KICAgICAgICAgIDwvYTplZmZlY3RMc3Q+CiAgICAgICAgICA8YTpzY2VuZTNkPgogICAgICAgICAgICA8YTpjYW1lcmEgcHJzdD0ib3J0aG9ncmFwaGljRnJvbnQiPgogICAgICAgICAgICAgIDxhOnJvdCBsYXQ9IjAiIGxvbj0iMCIgcmV2PSIwIi8+CiAgICAgICAgICAgIDwvYTpjYW1lcmE+CiAgICAgICAgICAgIDxhOmxpZ2h0UmlnIHJpZz0idGhyZWVQdCIgZGlyPSJ0Ij4KICAgICAgICAgICAgICA8YTpyb3QgbGF0PSIwIiBsb249IjAiIHJldj0iMTIwMDAwMCIvPgogICAgICAgICAgICA8L2E6bGlnaHRSaWc+CiAgICAgICAgICA8L2E6c2NlbmUzZD4KICAgICAgICAgIDxhOnNwM2Q+CiAgICAgICAgICAgIDxhOmJldmVsVCB3PSI2MzUwMCIgaD0iMjU0MDAiLz4KICAgICAgICAgIDwvYTpzcDNkPgogICAgICAgIDwvYTplZmZlY3RTdHlsZT4KICAgICAgPC9hOmVmZmVjdFN0eWxlTHN0PgogICAgICA8YTpiZ0ZpbGxTdHlsZUxzdD4KICAgICAgICA8YTpzb2xpZEZpbGw+CiAgICAgICAgICA8YTpzY2hlbWVDbHIgdmFsPSJwaENsciIvPgogICAgICAgIDwvYTpzb2xpZEZpbGw+CiAgICAgICAgPGE6Z3JhZEZpbGwgcm90V2l0aFNoYXBlPSIxIj4KICAgICAgICAgIDxhOmdzTHN0PgogICAgICAgICAgICA8YTpncyBwb3M9IjAiPgogICAgICAgICAgICAgIDxhOnNjaGVtZUNsciB2YWw9InBoQ2xyIj4KICAgICAgICAgICAgICAgIDxhOnRpbnQgdmFsPSI0MDAwMCIvPgogICAgICAgICAgICAgICAgPGE6c2F0TW9kIHZhbD0iMzUwMDAwIi8+CiAgICAgICAgICAgICAgPC9hOnNjaGVtZUNscj4KICAgICAgICAgICAgPC9hOmdzPgogICAgICAgICAgICA8YTpncyBwb3M9IjQwMDAwIj4KICAgICAgICAgICAgICA8YTpzY2hlbWVDbHIgdmFsPSJwaENsciI+CiAgICAgICAgICAgICAgICA8YTp0aW50IHZhbD0iNDUwMDAiLz4KICAgICAgICAgICAgICAgIDxhOnNoYWRlIHZhbD0iOTkwMDAiLz4KICAgICAgICAgICAgICAgIDxhOnNhdE1vZCB2YWw9IjM1MDAwMCIvPgogICAgICAgICAgICAgIDwvYTpzY2hlbWVDbHI+CiAgICAgICAgICAgIDwvYTpncz4KICAgICAgICAgICAgPGE6Z3MgcG9zPSIxMDAwMDAiPgogICAgICAgICAgICAgIDxhOnNjaGVtZUNsciB2YWw9InBoQ2xyIj4KICAgICAgICAgICAgICAgIDxhOnNoYWRlIHZhbD0iMjAwMDAiLz4KICAgICAgICAgICAgICAgIDxhOnNhdE1vZCB2YWw9IjI1NTAwMCIvPgogICAgICAgICAgICAgIDwvYTpzY2hlbWVDbHI+CiAgICAgICAgICAgIDwvYTpncz4KICAgICAgICAgIDwvYTpnc0xzdD4KICAgICAgICAgIDxhOnBhdGggcGF0aD0iY2lyY2xlIj4KICAgICAgICAgICAgPGE6ZmlsbFRvUmVjdCBsPSI1MDAwMCIgdD0iLTgwMDAwIiByPSI1MDAwMCIgYj0iMTgwMDAwIi8+CiAgICAgICAgICA8L2E6cGF0aD4KICAgICAgICA8L2E6Z3JhZEZpbGw+CiAgICAgICAgPGE6Z3JhZEZpbGwgcm90V2l0aFNoYXBlPSIxIj4KICAgICAgICAgIDxhOmdzTHN0PgogICAgICAgICAgICA8YTpncyBwb3M9IjAiPgogICAgICAgICAgICAgIDxhOnNjaGVtZUNsciB2YWw9InBoQ2xyIj4KICAgICAgICAgICAgICAgIDxhOnRpbnQgdmFsPSI4MDAwMCIvPgogICAgICAgICAgICAgICAgPGE6c2F0TW9kIHZhbD0iMzAwMDAwIi8+CiAgICAgICAgICAgICAgPC9hOnNjaGVtZUNscj4KICAgICAgICAgICAgPC9hOmdzPgogICAgICAgICAgICA8YTpncyBwb3M9IjEwMDAwMCI+CiAgICAgICAgICAgICAgPGE6c2NoZW1lQ2xyIHZhbD0icGhDbHIiPgogICAgICAgICAgICAgICAgPGE6c2hhZGUgdmFsPSIzMDAwMCIvPgogICAgICAgICAgICAgICAgPGE6c2F0TW9kIHZhbD0iMjAwMDAwIi8+CiAgICAgICAgICAgICAgPC9hOnNjaGVtZUNscj4KICAgICAgICAgICAgPC9hOmdzPgogICAgICAgICAgPC9hOmdzTHN0PgogICAgICAgICAgPGE6cGF0aCBwYXRoPSJjaXJjbGUiPgogICAgICAgICAgICA8YTpmaWxsVG9SZWN0IGw9IjUwMDAwIiB0PSI1MDAwMCIgcj0iNTAwMDAiIGI9IjUwMDAwIi8+CiAgICAgICAgICA8L2E6cGF0aD4KICAgICAgICA8L2E6Z3JhZEZpbGw+CiAgICAgIDwvYTpiZ0ZpbGxTdHlsZUxzdD4KICAgIDwvYTpmbXRTY2hlbWU+CiAgPC9hOnRoZW1lRWxlbWVudHM+CiAgPGE6b2JqZWN0RGVmYXVsdHMvPgogIDxhOmV4dHJhQ2xyU2NoZW1lTHN0Lz4KPC9hOnRoZW1lPgpQSwMEFAAAAAAACm3xXMWbPGERJAAAESQAABgAAAB4bC93b3Jrc2hlZXRzL3NoZWV0MS54bWw8d29ya3NoZWV0IHhtbG5zPSJodHRwOi8vc2NoZW1hcy5vcGVueG1sZm9ybWF0cy5vcmcvc3ByZWFkc2hlZXRtbC8yMDA2L21haW4iPjxzaGVldFByPjxvdXRsaW5lUHIgc3VtbWFyeUJlbG93PSIxIiBzdW1tYXJ5UmlnaHQ9IjEiLz48cGFnZVNldFVwUHIvPjwvc2hlZXRQcj48ZGltZW5zaW9uIHJlZj0iQjI6RjM2Ii8+PHNoZWV0Vmlld3M+PHNoZWV0VmlldyBzaG93R3JpZExpbmVzPSIwIiB3b3JrYm9va1ZpZXdJZD0iMCI+PHNlbGVjdGlvbiBhY3RpdmVDZWxsPSJBMSIgc3FyZWY9IkExIi8+PC9zaGVldFZpZXc+PC9zaGVldFZpZXdzPjxzaGVldEZvcm1hdFByIGJhc2VDb2xXaWR0aD0iOCIgZGVmYXVsdFJvd0hlaWdodD0iMTUiLz48Y29scz48Y29sIHdpZHRoPSIyIiBjdXN0b21XaWR0aD0iMSIgbWluPSIxIiBtYXg9IjEiLz48Y29sIHdpZHRoPSIyOCIgY3VzdG9tV2lkdGg9IjEiIG1pbj0iMiIgbWF4PSIyIi8+PGNvbCB3aWR0aD0iMTgiIGN1c3RvbVdpZHRoPSIxIiBtaW49IjMiIG1heD0iMyIvPjxjb2wgd2lkdGg9IjQiIGN1c3RvbVdpZHRoPSIxIiBtaW49IjQiIG1heD0iNCIvPjxjb2wgd2lkdGg9IjI0IiBjdXN0b21XaWR0aD0iMSIgbWluPSI1IiBtYXg9IjUiLz48Y29sIHdpZHRoPSIxOCIgY3VzdG9tV2lkdGg9IjEiIG1pbj0iNiIgbWF4PSI2Ii8+PGNvbCB3aWR0aD0iMiIgY3VzdG9tV2lkdGg9IjEiIG1pbj0iNyIgbWF4PSI3Ii8+PC9jb2xzPjxzaGVldERhdGE+PHJvdyByPSIxIiBodD0iNiIgY3VzdG9tSGVpZ2h0PSIxIj48L3Jvdz48cm93IHI9IjIiIGh0PSI0NCIgY3VzdG9tSGVpZ2h0PSIxIj48YyByPSJCMiIgcz0iMSIgdD0iaW5saW5lU3RyIj48aXM+PHQ+SG9ub3JWZXQgVGVjaG5vbG9naWVzPC90PjwvaXM+PC9jPjxjIHI9IkMyIiBzPSIyIiB0PSJuIj48L2M+PGMgcj0iRDIiIHM9IjIiIHQ9Im4iPjwvYz48YyByPSJFMiIgcz0iMyIgdD0iaW5saW5lU3RyIj48aXM+PHQ+X19fTU9ERV9EQVRFX19fPC90PjwvaXM+PC9jPjxjIHI9IkYyIiBzPSIyIiB0PSJuIj48L2M+PC9yb3c+PHJvdyByPSIzIiBodD0iNCIgY3VzdG9tSGVpZ2h0PSIxIj48YyByPSJCMyIgcz0iNCIgdD0ibiI+PC9jPjxjIHI9IkMzIiBzPSI0IiB0PSJuIj48L2M+PGMgcj0iRDMiIHM9IjQiIHQ9Im4iPjwvYz48YyByPSJFMyIgcz0iNCIgdD0ibiI+PC9jPjxjIHI9IkYzIiBzPSI0IiB0PSJuIj48L2M+PC9yb3c+PHJvdyByPSI0IiBodD0iOCIgY3VzdG9tSGVpZ2h0PSIxIj48L3Jvdz48cm93IHI9IjUiIGh0PSIxOCIgY3VzdG9tSGVpZ2h0PSIxIj48YyByPSJCNSIgcz0iNSIgdD0iaW5saW5lU3RyIj48aXM+PHQ+JiMxMDAwMzsgIEhPVVJMWSBQUk9GSVQgTUFSR0lOPC90PjwvaXM+PC9jPjxjIHI9IkM1IiBzPSI2IiB0PSJuIj48L2M+PGMgcj0iRDUiIHM9IjYiIHQ9Im4iPjwvYz48YyByPSJFNSIgcz0iNyIgdD0iaW5saW5lU3RyIj48aXM+PHQ+UHJvamVjdCBCaWxsaW5nPC90PjwvaXM+PC9jPjxjIHI9IkY1IiBzPSI4IiB0PSJpbmxpbmVTdHIiPjxpcz48dD5Ub3RhbCBIb3VyczwvdD48L2lzPjwvYz48L3Jvdz48cm93IHI9IjYiIGh0PSI0MiIgY3VzdG9tSGVpZ2h0PSIxIj48YyByPSJCNiIgcz0iOSIgdD0iaW5saW5lU3RyIj48aXM+PHQ+X19fTUFSR0lOX19fPC90PjwvaXM+PC9jPjxjIHI9IkM2IiBzPSIxMCIgdD0ibiI+PC9jPjxjIHI9IkQ2IiBzPSIxMCIgdD0ibiI+PC9jPjxjIHI9IkU2IiBzPSIxMSIgdD0iaW5saW5lU3RyIj48aXM+PHQ+X19fQklMTElOR19fXzwvdD48L2lzPjwvYz48YyByPSJGNiIgcz0iMTIiIHQ9ImlubGluZVN0ciI+PGlzPjx0Pl9fX1RPVEFMSFJTX19fPC90PjwvaXM+PC9jPjwvcm93Pjxyb3cgcj0iNyIgaHQ9IjE0IiBjdXN0b21IZWlnaHQ9IjEiPjxjIHI9IkI3IiBzPSIxMyIgdD0iaW5saW5lU3RyIj48aXM+PHQ+cGVyIGJpbGxhYmxlIGhvdXI8L3Q+PC9pcz48L2M+PGMgcj0iQzciIHM9IjE0IiB0PSJuIj48L2M+PGMgcj0iRDciIHM9IjE0IiB0PSJuIj48L2M+PGMgcj0iRTciIHM9IjE0IiB0PSJuIj48L2M+PGMgcj0iRjciIHM9IjE1IiB0PSJuIj48L2M+PC9yb3c+PHJvdyByPSI5IiBodD0iMjIiIGN1c3RvbUhlaWdodD0iMSI+PGMgcj0iQjkiIHM9IjE2IiB0PSJpbmxpbmVTdHIiPjxpcz48dCB4bWw6c3BhY2U9InByZXNlcnZlIj4gIENMSU5JQ0lBTiBERVRBSUxTPC90PjwvaXM+PC9jPjxjIHI9IkM5IiBzPSIyIiB0PSJuIj48L2M+PGMgcj0iRDkiIHM9IjIiIHQ9Im4iPjwvYz48YyByPSJFOSIgcz0iMiIgdD0ibiI+PC9jPjxjIHI9IkY5IiBzPSIyIiB0PSJuIj48L2M+PC9yb3c+PHJvdyByPSIxMCIgaHQ9IjIwIiBjdXN0b21IZWlnaHQ9IjEiPjxjIHI9IkIxMCIgcz0iMTciIHQ9ImlubGluZVN0ciI+PGlzPjx0PkNsaW5pY2lhbiBOYW1lPC90PjwvaXM+PC9jPjxjIHI9IkMxMCIgcz0iMTgiIHQ9ImlubGluZVN0ciI+PGlzPjx0Pl9fX0NMSU5OQU1FX19fPC90PjwvaXM+PC9jPjxjIHI9IkQxMCIgcz0iMTkiIHQ9Im4iPjwvYz48YyByPSJFMTAiIHM9IjE3IiB0PSJpbmxpbmVTdHIiPjxpcz48dD5SZWNydWl0ZXI8L3Q+PC9pcz48L2M+PGMgcj0iRjEwIiBzPSIxOCIgdD0iaW5saW5lU3RyIj48aXM+PHQ+X19fUkVDUlVJVEVSX19fPC90PjwvaXM+PC9jPjwvcm93Pjxyb3cgcj0iMTEiIGh0PSIyMCIgY3VzdG9tSGVpZ2h0PSIxIj48YyByPSJCMTEiIHM9IjIwIiB0PSJpbmxpbmVTdHIiPjxpcz48dD5Kb2IgVGl0bGU8L3Q+PC9pcz48L2M+PGMgcj0iQzExIiBzPSIyMSIgdD0iaW5saW5lU3RyIj48aXM+PHQ+X19fQ0xJTlRJVExFX19fPC90PjwvaXM+PC9jPjxjIHI9IkQxMSIgcz0iMTkiIHQ9Im4iPjwvYz48YyByPSJFMTEiIHM9IjIwIiB0PSJpbmxpbmVTdHIiPjxpcz48dD5UZWFtIExlYWQgKFRMKTwvdD48L2lzPjwvYz48YyByPSJGMTEiIHM9IjIxIiB0PSJpbmxpbmVTdHIiPjxpcz48dD5fX19UTF9fXzwvdD48L2lzPjwvYz48L3Jvdz48cm93IHI9IjEyIiBodD0iMjAiIGN1c3RvbUhlaWdodD0iMSI+PGMgcj0iQjEyIiBzPSIxNyIgdD0iaW5saW5lU3RyIj48aXM+PHQ+TG9jYXRpb248L3Q+PC9pcz48L2M+PGMgcj0iQzEyIiBzPSIxOCIgdD0iaW5saW5lU3RyIj48aXM+PHQ+X19fQ0xJTkxPQ19fXzwvdD48L2lzPjwvYz48YyByPSJEMTIiIHM9IjE5IiB0PSJuIj48L2M+PGMgcj0iRTEyIiBzPSIxNyIgdD0iaW5saW5lU3RyIj48aXM+PHQ+RGVsaXZlcnkgTWFuYWdlcjwvdD48L2lzPjwvYz48YyByPSJGMTIiIHM9IjE4IiB0PSJpbmxpbmVTdHIiPjxpcz48dD5fX19ETV9fXzwvdD48L2lzPjwvYz48L3Jvdz48cm93IHI9IjEzIiBodD0iMjAiIGN1c3RvbUhlaWdodD0iMSI+PGMgcj0iQjEzIiBzPSIyMCIgdD0iaW5saW5lU3RyIj48aXM+PHQ+Q2xpZW50PC90PjwvaXM+PC9jPjxjIHI9IkMxMyIgcz0iMjEiIHQ9ImlubGluZVN0ciI+PGlzPjx0Pl9fX0NMSUVOVF9fXzwvdD48L2lzPjwvYz48YyByPSJEMTMiIHM9IjE5IiB0PSJuIj48L2M+PGMgcj0iRTEzIiBzPSIxOSIgdD0ibiI+PC9jPjxjIHI9IkYxMyIgcz0iMTkiIHQ9Im4iPjwvYz48L3Jvdz48cm93IHI9IjE1IiBodD0iMjIiIGN1c3RvbUhlaWdodD0iMSI+PGMgcj0iQjE1IiBzPSIxNiIgdD0iaW5saW5lU3RyIj48aXM+PHQgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+ICBDT05UUkFDVCBJTlBVVFM8L3Q+PC9pcz48L2M+PGMgcj0iQzE1IiBzPSIyIiB0PSJuIj48L2M+PGMgcj0iRDE1IiBzPSIyIiB0PSJuIj48L2M+PGMgcj0iRTE1IiBzPSIyIiB0PSJuIj48L2M+PGMgcj0iRjE1IiBzPSIyIiB0PSJuIj48L2M+PC9yb3c+PHJvdyByPSIxNiIgaHQ9IjIwIiBjdXN0b21IZWlnaHQ9IjEiPjxjIHI9IkIxNiIgcz0iMTciIHQ9ImlubGluZVN0ciI+PGlzPjx0PkJpbGwgUmF0ZSAoJC9ocik8L3Q+PC9pcz48L2M+PGMgcj0iQzE2IiBzPSIxOCIgdD0iaW5saW5lU3RyIj48aXM+PHQ+X19fQlJfX188L3Q+PC9pcz48L2M+PGMgcj0iRDE2IiBzPSIxOSIgdD0ibiI+PC9jPjxjIHI9IkUxNiIgcz0iMTciIHQ9ImlubGluZVN0ciI+PGlzPjx0PlctMiBSYXRlICgkL2hyKTwvdD48L2lzPjwvYz48YyByPSJGMTYiIHM9IjE4IiB0PSJpbmxpbmVTdHIiPjxpcz48dD5fX19XMl9fXzwvdD48L2lzPjwvYz48L3Jvdz48cm93IHI9IjE3IiBodD0iMjAiIGN1c3RvbUhlaWdodD0iMSI+PGMgcj0iQjE3IiBzPSIyMCIgdD0iaW5saW5lU3RyIj48aXM+PHQ+TVNQIEZlZTwvdD48L2lzPjwvYz48YyByPSJDMTciIHM9IjIxIiB0PSJpbmxpbmVTdHIiPjxpcz48dD5fX19NU1BfX188L3Q+PC9pcz48L2M+PGMgcj0iRDE3IiBzPSIxOSIgdD0ibiI+PC9jPjxjIHI9IkUxNyIgcz0iMjAiIHQ9ImlubGluZVN0ciI+PGlzPjx0PlN0aXBlbmQgKCQvaHIpPC90PjwvaXM+PC9jPjxjIHI9IkYxNyIgcz0iMjEiIHQ9ImlubGluZVN0ciI+PGlzPjx0Pl9fX1NIX19fPC90PjwvaXM+PC9jPjwvcm93Pjxyb3cgcj0iMTgiIGh0PSIyMCIgY3VzdG9tSGVpZ2h0PSIxIj48YyByPSJCMTgiIHM9IjE3IiB0PSJpbmxpbmVTdHIiPjxpcz48dD5SZWcgSHJzL1dlZWs8L3Q+PC9pcz48L2M+PGMgcj0iQzE4IiBzPSIxOCIgdD0iaW5saW5lU3RyIj48aXM+PHQ+X19fUkhfX188L3Q+PC9pcz48L2M+PGMgcj0iRDE4IiBzPSIxOSIgdD0ibiI+PC9jPjxjIHI9IkUxOCIgcz0iMTciIHQ9ImlubGluZVN0ciI+PGlzPjx0Pk9UIEhycy9XZWVrPC90PjwvaXM+PC9jPjxjIHI9IkYxOCIgcz0iMTgiIHQ9ImlubGluZVN0ciI+PGlzPjx0Pl9fX09IX19fPC90PjwvaXM+PC9jPjwvcm93Pjxyb3cgcj0iMTkiIGh0PSIyMCIgY3VzdG9tSGVpZ2h0PSIxIj48YyByPSJCMTkiIHM9IjIwIiB0PSJpbmxpbmVTdHIiPjxpcz48dD5Db250cmFjdCBXZWVrczwvdD48L2lzPjwvYz48YyByPSJDMTkiIHM9IjIxIiB0PSJpbmxpbmVTdHIiPjxpcz48dD5fX19XS19fXzwvdD48L2lzPjwvYz48YyByPSJEMTkiIHM9IjE5IiB0PSJuIj48L2M+PGMgcj0iRTE5IiBzPSIyMCIgdD0iaW5saW5lU3RyIj48aXM+PHQ+T3JpZW50YXRpb24gSG91cnM8L3Q+PC9pcz48L2M+PGMgcj0iRjE5IiBzPSIyMSIgdD0iaW5saW5lU3RyIj48aXM+PHQ+X19fT1JUX19fPC90PjwvaXM+PC9jPjwvcm93Pjxyb3cgcj0iMjEiIGh0PSIyMiIgY3VzdG9tSGVpZ2h0PSIxIj48YyByPSJCMjEiIHM9IjE2IiB0PSJpbmxpbmVTdHIiPjxpcz48dCB4bWw6c3BhY2U9InByZXNlcnZlIj4gIEhPVVJMWSBCUkVBS0RPV048L3Q+PC9pcz48L2M+PGMgcj0iQzIxIiBzPSIyIiB0PSJuIj48L2M+PGMgcj0iRDIxIiBzPSIyIiB0PSJuIj48L2M+PGMgcj0iRTIxIiBzPSIyIiB0PSJuIj48L2M+PGMgcj0iRjIxIiBzPSIyIiB0PSJuIj48L2M+PC9yb3c+PHJvdyByPSIyMiIgaHQ9IjIwIiBjdXN0b21IZWlnaHQ9IjEiPjxjIHI9IkIyMiIgcz0iMjIiIHQ9ImlubGluZVN0ciI+PGlzPjx0PlRvdGFsIFJhdGUgKEJsZW5kZWQpPC90PjwvaXM+PC9jPjxjIHI9IkMyMiIgcz0iMjMiIHQ9ImlubGluZVN0ciI+PGlzPjx0Pl9fX1RPVEFMUkFURV9fXzwvdD48L2lzPjwvYz48YyByPSJEMjIiIHM9IjE5IiB0PSJuIj48L2M+PGMgcj0iRTIyIiBzPSIyNCIgdD0ibiI+PC9jPjxjIHI9IkYyMiIgcz0iMjQiIHQ9Im4iPjwvYz48L3Jvdz48cm93IHI9IjIzIiBodD0iMjAiIGN1c3RvbUhlaWdodD0iMSI+PGMgcj0iQjIzIiBzPSIxNyIgdD0iaW5saW5lU3RyIj48aXM+PHQ+Vy0yIChUYXhhYmxlKTwvdD48L2lzPjwvYz48YyByPSJDMjMiIHM9IjI1IiB0PSJpbmxpbmVTdHIiPjxpcz48dD5fX19XMlJBVEVfX188L3Q+PC9pcz48L2M+PGMgcj0iRDIzIiBzPSIxOSIgdD0ibiI+PC9jPjxjIHI9IkUyMyIgcz0iMjYiIHQ9Im4iPjwvYz48YyByPSJGMjMiIHM9IjI2IiB0PSJuIj48L2M+PC9yb3c+PHJvdyByPSIyNCIgaHQ9IjIwIiBjdXN0b21IZWlnaHQ9IjEiPjxjIHI9IkIyNCIgcz0iMTciIHQ9ImlubGluZVN0ciI+PGlzPjx0PlN0aXBlbmQgKE5vbi1UYXhhYmxlKTwvdD48L2lzPjwvYz48YyByPSJDMjQiIHM9IjI1IiB0PSJpbmxpbmVTdHIiPjxpcz48dD5fX19TVElQUkFURV9fXzwvdD48L2lzPjwvYz48YyByPSJEMjQiIHM9IjE5IiB0PSJuIj48L2M+PGMgcj0iRTI0IiBzPSIyNiIgdD0ibiI+PC9jPjxjIHI9IkYyNCIgcz0iMjYiIHQ9Im4iPjwvYz48L3Jvdz48cm93IHI9IjI1IiBodD0iMjAiIGN1c3RvbUhlaWdodD0iMSI+PGMgcj0iQjI1IiBzPSIxNyIgdD0iaW5saW5lU3RyIj48aXM+PHQ+T1QgVy0yIFJhdGU8L3Q+PC9pcz48L2M+PGMgcj0iQzI1IiBzPSIyNSIgdD0iaW5saW5lU3RyIj48aXM+PHQ+X19fT1RXMlJBVEVfX188L3Q+PC9pcz48L2M+PGMgcj0iRDI1IiBzPSIxOSIgdD0ibiI+PC9jPjxjIHI9IkUyNSIgcz0iMjYiIHQ9Im4iPjwvYz48YyByPSJGMjUiIHM9IjI2IiB0PSJuIj48L2M+PC9yb3c+PHJvdyByPSIyNyIgaHQ9IjIyIiBjdXN0b21IZWlnaHQ9IjEiPjxjIHI9IkIyNyIgcz0iMTYiIHQ9ImlubGluZVN0ciI+PGlzPjx0IHhtbDpzcGFjZT0icHJlc2VydmUiPiAgV0VFS0xZIEJSRUFLRE9XTjwvdD48L2lzPjwvYz48YyByPSJDMjciIHM9IjIiIHQ9Im4iPjwvYz48YyByPSJEMjciIHM9IjIiIHQ9Im4iPjwvYz48YyByPSJFMjciIHM9IjIiIHQ9Im4iPjwvYz48YyByPSJGMjciIHM9IjIiIHQ9Im4iPjwvYz48L3Jvdz48cm93IHI9IjI4IiBodD0iMTgiIGN1c3RvbUhlaWdodD0iMSI+PGMgcj0iQjI4IiBzPSIyNyIgdD0iaW5saW5lU3RyIj48aXM+PHQ+Q29tcG9uZW50PC90PjwvaXM+PC9jPjxjIHI9IkMyOCIgcz0iMjgiIHQ9ImlubGluZVN0ciI+PGlzPjx0PldlZWtseSAoJCk8L3Q+PC9pcz48L2M+PGMgcj0iRDI4IiBzPSIxOSIgdD0ibiI+PC9jPjxjIHI9IkUyOCIgcz0iMjgiIHQ9ImlubGluZVN0ciI+PGlzPjx0Pk1vbnRobHkgKHg0KTwvdD48L2lzPjwvYz48YyByPSJGMjgiIHM9IjI2IiB0PSJuIj48L2M+PC9yb3c+PHJvdyByPSIyOSIgaHQ9IjIwIiBjdXN0b21IZWlnaHQ9IjEiPjxjIHI9IkIyOSIgcz0iMjkiIHQ9ImlubGluZVN0ciI+PGlzPjx0PkJsZW5kZWQgUmF0ZSAoTnVyc2UpPC90PjwvaXM+PC9jPjxjIHI9IkMyOSIgcz0iMzAiIHQ9ImlubGluZVN0ciI+PGlzPjx0Pl9fX0JMRU5ERURfX188L3Q+PC9pcz48L2M+PGMgcj0iRDI5IiBzPSIxOSIgdD0ibiI+PC9jPjxjIHI9IkUyOSIgcz0iMzAiIHQ9ImlubGluZVN0ciI+PGlzPjx0Pi0tPC90PjwvaXM+PC9jPjxjIHI9IkYyOSIgcz0iMTkiIHQ9Im4iPjwvYz48L3Jvdz48cm93IHI9IjMwIiBodD0iMjAiIGN1c3RvbUhlaWdodD0iMSI+PGMgcj0iQjMwIiBzPSIzMSIgdD0iaW5saW5lU3RyIj48aXM+PHQ+Vy0yIChUYXhhYmxlKTwvdD48L2lzPjwvYz48YyByPSJDMzAiIHM9IjI1IiB0PSJpbmxpbmVTdHIiPjxpcz48dD5fX19XS1cyX19fPC90PjwvaXM+PC9jPjxjIHI9IkQzMCIgcz0iMTkiIHQ9Im4iPjwvYz48YyByPSJFMzAiIHM9IjI1IiB0PSJpbmxpbmVTdHIiPjxpcz48dD5fX19XS1cyTV9fXzwvdD48L2lzPjwvYz48YyByPSJGMzAiIHM9IjI2IiB0PSJuIj48L2M+PC9yb3c+PHJvdyByPSIzMSIgaHQ9IjIwIiBjdXN0b21IZWlnaHQ9IjEiPjxjIHI9IkIzMSIgcz0iMjkiIHQ9ImlubGluZVN0ciI+PGlzPjx0PlN0aXBlbmQgKE5vbi1UYXhhYmxlKTwvdD48L2lzPjwvYz48YyByPSJDMzEiIHM9IjMwIiB0PSJpbmxpbmVTdHIiPjxpcz48dD5fX19XS1NUX19fPC90PjwvaXM+PC9jPjxjIHI9IkQzMSIgcz0iMTkiIHQ9Im4iPjwvYz48YyByPSJFMzEiIHM9IjMwIiB0PSJpbmxpbmVTdHIiPjxpcz48dD5fX19XS1NUTV9fXzwvdD48L2lzPjwvYz48YyByPSJGMzEiIHM9IjE5IiB0PSJuIj48L2M+PC9yb3c+PHJvdyByPSIzMiIgaHQ9IjIwIiBjdXN0b21IZWlnaHQ9IjEiPjxjIHI9IkIzMiIgcz0iMzEiIHQ9ImlubGluZVN0ciI+PGlzPjx0Pk9UIFN0aXBlbmQ8L3Q+PC9pcz48L2M+PGMgcj0iQzMyIiBzPSIyNSIgdD0iaW5saW5lU3RyIj48aXM+PHQ+X19fV0tPVFNUX19fPC90PjwvaXM+PC9jPjxjIHI9IkQzMiIgcz0iMTkiIHQ9Im4iPjwvYz48YyByPSJFMzIiIHM9IjI1IiB0PSJpbmxpbmVTdHIiPjxpcz48dD4tLTwvdD48L2lzPjwvYz48YyByPSJGMzIiIHM9IjI2IiB0PSJuIj48L2M+PC9yb3c+PHJvdyByPSIzMyIgaHQ9IjIwIiBjdXN0b21IZWlnaHQ9IjEiPjxjIHI9IkIzMyIgcz0iMjkiIHQ9ImlubGluZVN0ciI+PGlzPjx0PkhvdXJzL1dlZWs8L3Q+PC9pcz48L2M+PGMgcj0iQzMzIiBzPSIzMCIgdD0iaW5saW5lU3RyIj48aXM+PHQ+X19fSFJTV0tfX188L3Q+PC9pcz48L2M+PGMgcj0iRDMzIiBzPSIxOSIgdD0ibiI+PC9jPjxjIHI9IkUzMyIgcz0iMzAiIHQ9ImlubGluZVN0ciI+PGlzPjx0Pi0tPC90PjwvaXM+PC9jPjxjIHI9IkYzMyIgcz0iMTkiIHQ9Im4iPjwvYz48L3Jvdz48cm93IHI9IjM0IiBodD0iMjAiIGN1c3RvbUhlaWdodD0iMSI+PGMgcj0iQjM0IiBzPSIzMiIgdD0iaW5saW5lU3RyIj48aXM+PHQ+V2Vla2x5IEdyb3NzPC90PjwvaXM+PC9jPjxjIHI9IkMzNCIgcz0iMzMiIHQ9ImlubGluZVN0ciI+PGlzPjx0Pl9fX1dLR1JPU1NfX188L3Q+PC9pcz48L2M+PGMgcj0iRDM0IiBzPSIzNCIgdD0ibiI+PC9jPjxjIHI9IkUzNCIgcz0iMzMiIHQ9ImlubGluZVN0ciI+PGlzPjx0Pl9fX1dLR1JPU1NNX19fPC90PjwvaXM+PC9jPjxjIHI9IkYzNCIgcz0iMzQiIHQ9Im4iPjwvYz48L3Jvdz48cm93IHI9IjM2IiBodD0iMjQiIGN1c3RvbUhlaWdodD0iMSI+PGMgcj0iQjM2IiBzPSIzNSIgdD0iaW5saW5lU3RyIj48aXM+PHQ+SG9ub3JWZXQgVGVjaG5vbG9naWVzICB8ICBJbnRlcm5hbCBVc2UgT25seSAgfCAgQ29uZmlkZW50aWFsPC90PjwvaXM+PC9jPjxjIHI9IkMzNiIgcz0iMzYiIHQ9Im4iPjwvYz48YyByPSJEMzYiIHM9IjM2IiB0PSJuIj48L2M+PGMgcj0iRTM2IiBzPSIzNiIgdD0ibiI+PC9jPjxjIHI9IkYzNiIgcz0iMzYiIHQ9Im4iPjwvYz48L3Jvdz48L3NoZWV0RGF0YT48bWVyZ2VDZWxscyBjb3VudD0iMTAiPjxtZXJnZUNlbGwgcmVmPSJCMjE6RjIxIi8+PG1lcmdlQ2VsbCByZWY9IkI2OkM2Ii8+PG1lcmdlQ2VsbCByZWY9IkIyNzpGMjciLz48bWVyZ2VDZWxsIHJlZj0iQjc6QzciLz48bWVyZ2VDZWxsIHJlZj0iRTI6RjIiLz48bWVyZ2VDZWxsIHJlZj0iQjU6QzUiLz48bWVyZ2VDZWxsIHJlZj0iQjE1OkYxNSIvPjxtZXJnZUNlbGwgcmVmPSJCMzY6RjM2Ii8+PG1lcmdlQ2VsbCByZWY9IkI5OkY5Ii8+PG1lcmdlQ2VsbCByZWY9IkIyOkQyIi8+PC9tZXJnZUNlbGxzPjxwYWdlTWFyZ2lucyBsZWZ0PSIwLjc1IiByaWdodD0iMC43NSIgdG9wPSIxIiBib3R0b209IjEiIGhlYWRlcj0iMC41IiBmb290ZXI9IjAuNSIvPjwvd29ya3NoZWV0PlBLAwQUAAAAAAAKbfFceu7gZDsoAAA7KAAADQAAAHhsL3N0eWxlcy54bWw8c3R5bGVTaGVldCB4bWxucz0iaHR0cDovL3NjaGVtYXMub3BlbnhtbGZvcm1hdHMub3JnL3NwcmVhZHNoZWV0bWwvMjAwNi9tYWluIj48bnVtRm10cyBjb3VudD0iMCIvPjxmb250cyBjb3VudD0iMTUiPjxmb250PjxuYW1lIHZhbD0iQ2FsaWJyaSIvPjxmYW1pbHkgdmFsPSIyIi8+PGNvbG9yIHRoZW1lPSIxIi8+PHN6IHZhbD0iMTEiLz48c2NoZW1lIHZhbD0ibWlub3IiLz48L2ZvbnQ+PGZvbnQ+PG5hbWUgdmFsPSJDYWxpYnJpIi8+PGIgdmFsPSIxIi8+PGNvbG9yIHJnYj0iMDBGRkZGRkYiLz48c3ogdmFsPSIxOCIvPjwvZm9udD48Zm9udD48bmFtZSB2YWw9IkNhbGlicmkiLz48Y29sb3IgcmdiPSIwMDk0QTNCOCIvPjxzeiB2YWw9IjkiLz48L2ZvbnQ+PGZvbnQ+PG5hbWUgdmFsPSJDYWxpYnJpIi8+PGIgdmFsPSIxIi8+PGNvbG9yIHJnYj0iMDAxNTgwM0QiLz48c3ogdmFsPSI5Ii8+PC9mb250Pjxmb250PjxuYW1lIHZhbD0iQ2FsaWJyaSIvPjxjb2xvciByZ2I9IjAwNjQ3NDhCIi8+PHN6IHZhbD0iOSIvPjwvZm9udD48Zm9udD48bmFtZSB2YWw9IkNhbGlicmkiLz48YiB2YWw9IjEiLz48Y29sb3IgcmdiPSIwMDE1ODAzRCIvPjxzeiB2YWw9IjMwIi8+PC9mb250Pjxmb250PjxuYW1lIHZhbD0iQ2FsaWJyaSIvPjxiIHZhbD0iMSIvPjxjb2xvciByZ2I9IjAwMEYxNzJBIi8+PHN6IHZhbD0iMTYiLz48L2ZvbnQ+PGZvbnQ+PG5hbWUgdmFsPSJDYWxpYnJpIi8+PGkgdmFsPSIxIi8+PGNvbG9yIHJnYj0iMDA2NDc0OEIiLz48c3ogdmFsPSI4Ii8+PC9mb250Pjxmb250PjxuYW1lIHZhbD0iQ2FsaWJyaSIvPjxiIHZhbD0iMSIvPjxjb2xvciByZ2I9IjAwRkZGRkZGIi8+PHN6IHZhbD0iOSIvPjwvZm9udD48Zm9udD48bmFtZSB2YWw9IkNhbGlicmkiLz48YiB2YWw9IjEiLz48Y29sb3IgcmdiPSIwMDBGMTcyQSIvPjxzeiB2YWw9IjEwIi8+PC9mb250Pjxmb250PjxuYW1lIHZhbD0iQ2FsaWJyaSIvPjxiIHZhbD0iMSIvPjxjb2xvciByZ2I9IjAwMUQ0RUQ4Ii8+PHN6IHZhbD0iMTAiLz48L2ZvbnQ+PGZvbnQ+PG5hbWUgdmFsPSJDYWxpYnJpIi8+PGNvbG9yIHJnYj0iMDAwRjE3MkEiLz48c3ogdmFsPSIxMCIvPjwvZm9udD48Zm9udD48bmFtZSB2YWw9IkNhbGlicmkiLz48YiB2YWw9IjEiLz48Y29sb3IgcmdiPSIwMDY0NzQ4QiIvPjxzeiB2YWw9IjkiLz48L2ZvbnQ+PGZvbnQ+PG5hbWUgdmFsPSJDYWxpYnJpIi8+PGNvbG9yIHJnYj0iMDAwRjE3MkEiLz48c3ogdmFsPSI5Ii8+PC9mb250Pjxmb250PjxuYW1lIHZhbD0iQ2FsaWJyaSIvPjxiIHZhbD0iMSIvPjxjb2xvciByZ2I9IjAwRkZGRkZGIi8+PHN6IHZhbD0iMTAiLz48L2ZvbnQ+PC9mb250cz48ZmlsbHMgY291bnQ9IjgiPjxmaWxsPjxwYXR0ZXJuRmlsbC8+PC9maWxsPjxmaWxsPjxwYXR0ZXJuRmlsbCBwYXR0ZXJuVHlwZT0iZ3JheTEyNSIvPjwvZmlsbD48ZmlsbD48cGF0dGVybkZpbGwgcGF0dGVyblR5cGU9InNvbGlkIj48ZmdDb2xvciByZ2I9IjAwMEYxNzJBIi8+PC9wYXR0ZXJuRmlsbD48L2ZpbGw+PGZpbGw+PHBhdHRlcm5GaWxsIHBhdHRlcm5UeXBlPSJzb2xpZCI+PGZnQ29sb3IgcmdiPSIwMERDMjYyNiIvPjwvcGF0dGVybkZpbGw+PC9maWxsPjxmaWxsPjxwYXR0ZXJuRmlsbCBwYXR0ZXJuVHlwZT0ic29saWQiPjxmZ0NvbG9yIHJnYj0iMDBGMEZERjQiLz48L3BhdHRlcm5GaWxsPjwvZmlsbD48ZmlsbD48cGF0dGVybkZpbGwgcGF0dGVyblR5cGU9InNvbGlkIj48ZmdDb2xvciByZ2I9IjAwRjhGQUZDIi8+PC9wYXR0ZXJuRmlsbD48L2ZpbGw+PGZpbGw+PHBhdHRlcm5GaWxsIHBhdHRlcm5UeXBlPSJzb2xpZCI+PGZnQ29sb3IgcmdiPSIwMEZGRkZGRiIvPjwvcGF0dGVybkZpbGw+PC9maWxsPjxmaWxsPjxwYXR0ZXJuRmlsbCBwYXR0ZXJuVHlwZT0ic29saWQiPjxmZ0NvbG9yIHJnYj0iMDBFRkY2RkYiLz48L3BhdHRlcm5GaWxsPjwvZmlsbD48L2ZpbGxzPjxib3JkZXJzIGNvdW50PSIxMiI+PGJvcmRlcj48bGVmdC8+PHJpZ2h0Lz48dG9wLz48Ym90dG9tLz48ZGlhZ29uYWwvPjwvYm9yZGVyPjxib3JkZXI+PGxlZnQgc3R5bGU9InRoaW4iPjxjb2xvciByZ2I9IjAwMTU4MDNEIi8+PC9sZWZ0Pjx0b3Agc3R5bGU9InRoaW4iPjxjb2xvciByZ2I9IjAwMTU4MDNEIi8+PC90b3A+PC9ib3JkZXI+PGJvcmRlcj48dG9wIHN0eWxlPSJ0aGluIj48Y29sb3IgcmdiPSIwMDE1ODAzRCIvPjwvdG9wPjwvYm9yZGVyPjxib3JkZXI+PHJpZ2h0IHN0eWxlPSJ0aGluIj48Y29sb3IgcmdiPSIwMDE1ODAzRCIvPjwvcmlnaHQ+PHRvcCBzdHlsZT0idGhpbiI+PGNvbG9yIHJnYj0iMDAxNTgwM0QiLz48L3RvcD48L2JvcmRlcj48Ym9yZGVyPjxsZWZ0IHN0eWxlPSJ0aGluIj48Y29sb3IgcmdiPSIwMDE1ODAzRCIvPjwvbGVmdD48L2JvcmRlcj48Ym9yZGVyPjxyaWdodCBzdHlsZT0idGhpbiI+PGNvbG9yIHJnYj0iMDAxNTgwM0QiLz48L3JpZ2h0PjwvYm9yZGVyPjxib3JkZXI+PGxlZnQgc3R5bGU9InRoaW4iPjxjb2xvciByZ2I9IjAwMTU4MDNEIi8+PC9sZWZ0Pjxib3R0b20gc3R5bGU9InRoaW4iPjxjb2xvciByZ2I9IjAwMTU4MDNEIi8+PC9ib3R0b20+PC9ib3JkZXI+PGJvcmRlcj48Ym90dG9tIHN0eWxlPSJ0aGluIj48Y29sb3IgcmdiPSIwMDE1ODAzRCIvPjwvYm90dG9tPjwvYm9yZGVyPjxib3JkZXI+PHJpZ2h0IHN0eWxlPSJ0aGluIj48Y29sb3IgcmdiPSIwMDE1ODAzRCIvPjwvcmlnaHQ+PGJvdHRvbSBzdHlsZT0idGhpbiI+PGNvbG9yIHJnYj0iMDAxNTgwM0QiLz48L2JvdHRvbT48L2JvcmRlcj48Ym9yZGVyPjxib3R0b20gc3R5bGU9InRoaW4iPjxjb2xvciByZ2I9IjAwRTJFOEYwIi8+PC9ib3R0b20+PC9ib3JkZXI+PGJvcmRlcj48Ym90dG9tIHN0eWxlPSJtZWRpdW0iPjxjb2xvciByZ2I9IjAwMEYxNzJBIi8+PC9ib3R0b20+PC9ib3JkZXI+PGJvcmRlcj48dG9wIHN0eWxlPSJtZWRpdW0iPjxjb2xvciByZ2I9IjAwMEYxNzJBIi8+PC90b3A+PC9ib3JkZXI+PC9ib3JkZXJzPjxjZWxsU3R5bGVYZnMgY291bnQ9IjEiPjx4ZiBudW1GbXRJZD0iMCIgZm9udElkPSIwIiBmaWxsSWQ9IjAiIGJvcmRlcklkPSIwIi8+PC9jZWxsU3R5bGVYZnM+PGNlbGxYZnMgY291bnQ9IjM3Ij48eGYgbnVtRm10SWQ9IjAiIGZvbnRJZD0iMCIgZmlsbElkPSIwIiBib3JkZXJJZD0iMCIgcGl2b3RCdXR0b249IjAiIHF1b3RlUHJlZml4PSIwIiB4ZklkPSIwIi8+PHhmIG51bUZtdElkPSIwIiBmb250SWQ9IjEiIGZpbGxJZD0iMiIgYm9yZGVySWQ9IjAiIGFwcGx5QWxpZ25tZW50PSIxIiBwaXZvdEJ1dHRvbj0iMCIgcXVvdGVQcmVmaXg9IjAiIHhmSWQ9IjAiPjxhbGlnbm1lbnQgaG9yaXpvbnRhbD0ibGVmdCIgdmVydGljYWw9ImNlbnRlciIvPjwveGY+PHhmIG51bUZtdElkPSIwIiBmb250SWQ9IjAiIGZpbGxJZD0iMiIgYm9yZGVySWQ9IjAiIHBpdm90QnV0dG9uPSIwIiBxdW90ZVByZWZpeD0iMCIgeGZJZD0iMCIvPjx4ZiBudW1GbXRJZD0iMCIgZm9udElkPSIyIiBmaWxsSWQ9IjIiIGJvcmRlcklkPSIwIiBhcHBseUFsaWdubWVudD0iMSIgcGl2b3RCdXR0b249IjAiIHF1b3RlUHJlZml4PSIwIiB4ZklkPSIwIj48YWxpZ25tZW50IGhvcml6b250YWw9InJpZ2h0IiB2ZXJ0aWNhbD0iY2VudGVyIi8+PC94Zj48eGYgbnVtRm10SWQ9IjAiIGZvbnRJZD0iMCIgZmlsbElkPSIzIiBib3JkZXJJZD0iMCIgcGl2b3RCdXR0b249IjAiIHF1b3RlUHJlZml4PSIwIiB4ZklkPSIwIi8+PHhmIG51bUZtdElkPSIwIiBmb250SWQ9IjMiIGZpbGxJZD0iNCIgYm9yZGVySWQ9IjEiIGFwcGx5QWxpZ25tZW50PSIxIiBwaXZvdEJ1dHRvbj0iMCIgcXVvdGVQcmVmaXg9IjAiIHhmSWQ9IjAiPjxhbGlnbm1lbnQgaG9yaXpvbnRhbD0ibGVmdCIgdmVydGljYWw9ImNlbnRlciIvPjwveGY+PHhmIG51bUZtdElkPSIwIiBmb250SWQ9IjAiIGZpbGxJZD0iNCIgYm9yZGVySWQ9IjIiIHBpdm90QnV0dG9uPSIwIiBxdW90ZVByZWZpeD0iMCIgeGZJZD0iMCIvPjx4ZiBudW1GbXRJZD0iMCIgZm9udElkPSI0IiBmaWxsSWQ9IjQiIGJvcmRlcklkPSIyIiBhcHBseUFsaWdubWVudD0iMSIgcGl2b3RCdXR0b249IjAiIHF1b3RlUHJlZml4PSIwIiB4ZklkPSIwIj48YWxpZ25tZW50IGhvcml6b250YWw9ImxlZnQiIHZlcnRpY2FsPSJjZW50ZXIiLz48L3hmPjx4ZiBudW1GbXRJZD0iMCIgZm9udElkPSI0IiBmaWxsSWQ9IjQiIGJvcmRlcklkPSIzIiBhcHBseUFsaWdubWVudD0iMSIgcGl2b3RCdXR0b249IjAiIHF1b3RlUHJlZml4PSIwIiB4ZklkPSIwIj48YWxpZ25tZW50IGhvcml6b250YWw9InJpZ2h0IiB2ZXJ0aWNhbD0iY2VudGVyIi8+PC94Zj48eGYgbnVtRm10SWQ9IjAiIGZvbnRJZD0iNSIgZmlsbElkPSI0IiBib3JkZXJJZD0iNCIgYXBwbHlBbGlnbm1lbnQ9IjEiIHBpdm90QnV0dG9uPSIwIiBxdW90ZVByZWZpeD0iMCIgeGZJZD0iMCI+PGFsaWdubWVudCBob3Jpem9udGFsPSJsZWZ0IiB2ZXJ0aWNhbD0iY2VudGVyIi8+PC94Zj48eGYgbnVtRm10SWQ9IjAiIGZvbnRJZD0iMCIgZmlsbElkPSI0IiBib3JkZXJJZD0iMCIgcGl2b3RCdXR0b249IjAiIHF1b3RlUHJlZml4PSIwIiB4ZklkPSIwIi8+PHhmIG51bUZtdElkPSIwIiBmb250SWQ9IjYiIGZpbGxJZD0iNCIgYm9yZGVySWQ9IjAiIGFwcGx5QWxpZ25tZW50PSIxIiBwaXZvdEJ1dHRvbj0iMCIgcXVvdGVQcmVmaXg9IjAiIHhmSWQ9IjAiPjxhbGlnbm1lbnQgaG9yaXpvbnRhbD0icmlnaHQiIHZlcnRpY2FsPSJjZW50ZXIiLz48L3hmPjx4ZiBudW1GbXRJZD0iMCIgZm9udElkPSI2IiBmaWxsSWQ9IjQiIGJvcmRlcklkPSI1IiBhcHBseUFsaWdubWVudD0iMSIgcGl2b3RCdXR0b249IjAiIHF1b3RlUHJlZml4PSIwIiB4ZklkPSIwIj48YWxpZ25tZW50IGhvcml6b250YWw9InJpZ2h0IiB2ZXJ0aWNhbD0iY2VudGVyIi8+PC94Zj48eGYgbnVtRm10SWQ9IjAiIGZvbnRJZD0iNyIgZmlsbElkPSI0IiBib3JkZXJJZD0iNiIgYXBwbHlBbGlnbm1lbnQ9IjEiIHBpdm90QnV0dG9uPSIwIiBxdW90ZVByZWZpeD0iMCIgeGZJZD0iMCI+PGFsaWdubWVudCBob3Jpem9udGFsPSJsZWZ0IiB2ZXJ0aWNhbD0iY2VudGVyIi8+PC94Zj48eGYgbnVtRm10SWQ9IjAiIGZvbnRJZD0iMCIgZmlsbElkPSI0IiBib3JkZXJJZD0iNyIgcGl2b3RCdXR0b249IjAiIHF1b3RlUHJlZml4PSIwIiB4ZklkPSIwIi8+PHhmIG51bUZtdElkPSIwIiBmb250SWQ9IjAiIGZpbGxJZD0iNCIgYm9yZGVySWQ9IjgiIHBpdm90QnV0dG9uPSIwIiBxdW90ZVByZWZpeD0iMCIgeGZJZD0iMCIvPjx4ZiBudW1GbXRJZD0iMCIgZm9udElkPSI4IiBmaWxsSWQ9IjIiIGJvcmRlcklkPSIwIiBhcHBseUFsaWdubWVudD0iMSIgcGl2b3RCdXR0b249IjAiIHF1b3RlUHJlZml4PSIwIiB4ZklkPSIwIj48YWxpZ25tZW50IGhvcml6b250YWw9ImxlZnQiIHZlcnRpY2FsPSJjZW50ZXIiLz48L3hmPjx4ZiBudW1GbXRJZD0iMCIgZm9udElkPSI0IiBmaWxsSWQ9IjUiIGJvcmRlcklkPSI5IiBhcHBseUFsaWdubWVudD0iMSIgcGl2b3RCdXR0b249IjAiIHF1b3RlUHJlZml4PSIwIiB4ZklkPSIwIj48YWxpZ25tZW50IGhvcml6b250YWw9ImxlZnQiIHZlcnRpY2FsPSJjZW50ZXIiLz48L3hmPjx4ZiBudW1GbXRJZD0iMCIgZm9udElkPSI5IiBmaWxsSWQ9IjUiIGJvcmRlcklkPSI5IiBhcHBseUFsaWdubWVudD0iMSIgcGl2b3RCdXR0b249IjAiIHF1b3RlUHJlZml4PSIwIiB4ZklkPSIwIj48YWxpZ25tZW50IGhvcml6b250YWw9InJpZ2h0IiB2ZXJ0aWNhbD0iY2VudGVyIi8+PC94Zj48eGYgbnVtRm10SWQ9IjAiIGZvbnRJZD0iMCIgZmlsbElkPSI2IiBib3JkZXJJZD0iOSIgcGl2b3RCdXR0b249IjAiIHF1b3RlUHJlZml4PSIwIiB4ZklkPSIwIi8+PHhmIG51bUZtdElkPSIwIiBmb250SWQ9IjQiIGZpbGxJZD0iNiIgYm9yZGVySWQ9IjkiIGFwcGx5QWxpZ25tZW50PSIxIiBwaXZvdEJ1dHRvbj0iMCIgcXVvdGVQcmVmaXg9IjAiIHhmSWQ9IjAiPjxhbGlnbm1lbnQgaG9yaXpvbnRhbD0ibGVmdCIgdmVydGljYWw9ImNlbnRlciIvPjwveGY+PHhmIG51bUZtdElkPSIwIiBmb250SWQ9IjkiIGZpbGxJZD0iNiIgYm9yZGVySWQ9IjkiIGFwcGx5QWxpZ25tZW50PSIxIiBwaXZvdEJ1dHRvbj0iMCIgcXVvdGVQcmVmaXg9IjAiIHhmSWQ9IjAiPjxhbGlnbm1lbnQgaG9yaXpvbnRhbD0icmlnaHQiIHZlcnRpY2FsPSJjZW50ZXIiLz48L3hmPjx4ZiBudW1GbXRJZD0iMCIgZm9udElkPSI0IiBmaWxsSWQ9IjciIGJvcmRlcklkPSI5IiBhcHBseUFsaWdubWVudD0iMSIgcGl2b3RCdXR0b249IjAiIHF1b3RlUHJlZml4PSIwIiB4ZklkPSIwIj48YWxpZ25tZW50IGhvcml6b250YWw9ImxlZnQiIHZlcnRpY2FsPSJjZW50ZXIiLz48L3hmPjx4ZiBudW1GbXRJZD0iMCIgZm9udElkPSIxMCIgZmlsbElkPSI3IiBib3JkZXJJZD0iOSIgYXBwbHlBbGlnbm1lbnQ9IjEiIHBpdm90QnV0dG9uPSIwIiBxdW90ZVByZWZpeD0iMCIgeGZJZD0iMCI+PGFsaWdubWVudCBob3Jpem9udGFsPSJyaWdodCIgdmVydGljYWw9ImNlbnRlciIvPjwveGY+PHhmIG51bUZtdElkPSIwIiBmb250SWQ9IjAiIGZpbGxJZD0iNyIgYm9yZGVySWQ9IjkiIHBpdm90QnV0dG9uPSIwIiBxdW90ZVByZWZpeD0iMCIgeGZJZD0iMCIvPjx4ZiBudW1GbXRJZD0iMCIgZm9udElkPSIxMSIgZmlsbElkPSI1IiBib3JkZXJJZD0iOSIgYXBwbHlBbGlnbm1lbnQ9IjEiIHBpdm90QnV0dG9uPSIwIiBxdW90ZVByZWZpeD0iMCIgeGZJZD0iMCI+PGFsaWdubWVudCBob3Jpem9udGFsPSJyaWdodCIgdmVydGljYWw9ImNlbnRlciIvPjwveGY+PHhmIG51bUZtdElkPSIwIiBmb250SWQ9IjAiIGZpbGxJZD0iNSIgYm9yZGVySWQ9IjkiIHBpdm90QnV0dG9uPSIwIiBxdW90ZVByZWZpeD0iMCIgeGZJZD0iMCIvPjx4ZiBudW1GbXRJZD0iMCIgZm9udElkPSIxMiIgZmlsbElkPSI1IiBib3JkZXJJZD0iOSIgYXBwbHlBbGlnbm1lbnQ9IjEiIHBpdm90QnV0dG9uPSIwIiBxdW90ZVByZWZpeD0iMCIgeGZJZD0iMCI+PGFsaWdubWVudCBob3Jpem9udGFsPSJsZWZ0IiB2ZXJ0aWNhbD0iY2VudGVyIi8+PC94Zj48eGYgbnVtRm10SWQ9IjAiIGZvbnRJZD0iMTIiIGZpbGxJZD0iNSIgYm9yZGVySWQ9IjkiIGFwcGx5QWxpZ25tZW50PSIxIiBwaXZvdEJ1dHRvbj0iMCIgcXVvdGVQcmVmaXg9IjAiIHhmSWQ9IjAiPjxhbGlnbm1lbnQgaG9yaXpvbnRhbD0icmlnaHQiIHZlcnRpY2FsPSJjZW50ZXIiLz48L3hmPjx4ZiBudW1GbXRJZD0iMCIgZm9udElkPSIxMyIgZmlsbElkPSI2IiBib3JkZXJJZD0iOSIgYXBwbHlBbGlnbm1lbnQ9IjEiIHBpdm90QnV0dG9uPSIwIiBxdW90ZVByZWZpeD0iMCIgeGZJZD0iMCI+PGFsaWdubWVudCBob3Jpem9udGFsPSJsZWZ0IiB2ZXJ0aWNhbD0iY2VudGVyIi8+PC94Zj48eGYgbnVtRm10SWQ9IjAiIGZvbnRJZD0iMTEiIGZpbGxJZD0iNiIgYm9yZGVySWQ9IjkiIGFwcGx5QWxpZ25tZW50PSIxIiBwaXZvdEJ1dHRvbj0iMCIgcXVvdGVQcmVmaXg9IjAiIHhmSWQ9IjAiPjxhbGlnbm1lbnQgaG9yaXpvbnRhbD0icmlnaHQiIHZlcnRpY2FsPSJjZW50ZXIiLz48L3hmPjx4ZiBudW1GbXRJZD0iMCIgZm9udElkPSIxMyIgZmlsbElkPSI1IiBib3JkZXJJZD0iOSIgYXBwbHlBbGlnbm1lbnQ9IjEiIHBpdm90QnV0dG9uPSIwIiBxdW90ZVByZWZpeD0iMCIgeGZJZD0iMCI+PGFsaWdubWVudCBob3Jpem9udGFsPSJsZWZ0IiB2ZXJ0aWNhbD0iY2VudGVyIi8+PC94Zj48eGYgbnVtRm10SWQ9IjAiIGZvbnRJZD0iOCIgZmlsbElkPSIyIiBib3JkZXJJZD0iMTAiIGFwcGx5QWxpZ25tZW50PSIxIiBwaXZvdEJ1dHRvbj0iMCIgcXVvdGVQcmVmaXg9IjAiIHhmSWQ9IjAiPjxhbGlnbm1lbnQgaG9yaXpvbnRhbD0ibGVmdCIgdmVydGljYWw9ImNlbnRlciIvPjwveGY+PHhmIG51bUZtdElkPSIwIiBmb250SWQ9IjE0IiBmaWxsSWQ9IjIiIGJvcmRlcklkPSIxMCIgYXBwbHlBbGlnbm1lbnQ9IjEiIHBpdm90QnV0dG9uPSIwIiBxdW90ZVByZWZpeD0iMCIgeGZJZD0iMCI+PGFsaWdubWVudCBob3Jpem9udGFsPSJyaWdodCIgdmVydGljYWw9ImNlbnRlciIvPjwveGY+PHhmIG51bUZtdElkPSIwIiBmb250SWQ9IjAiIGZpbGxJZD0iMiIgYm9yZGVySWQ9IjEwIiBwaXZvdEJ1dHRvbj0iMCIgcXVvdGVQcmVmaXg9IjAiIHhmSWQ9IjAiLz48eGYgbnVtRm10SWQ9IjAiIGZvbnRJZD0iNyIgZmlsbElkPSI1IiBib3JkZXJJZD0iMTEiIGFwcGx5QWxpZ25tZW50PSIxIiBwaXZvdEJ1dHRvbj0iMCIgcXVvdGVQcmVmaXg9IjAiIHhmSWQ9IjAiPjxhbGlnbm1lbnQgaG9yaXpvbnRhbD0iY2VudGVyIiB2ZXJ0aWNhbD0iY2VudGVyIi8+PC94Zj48eGYgbnVtRm10SWQ9IjAiIGZvbnRJZD0iMCIgZmlsbElkPSI1IiBib3JkZXJJZD0iMTEiIHBpdm90QnV0dG9uPSIwIiBxdW90ZVByZWZpeD0iMCIgeGZJZD0iMCIvPjwvY2VsbFhmcz48Y2VsbFN0eWxlcyBjb3VudD0iMSI+PGNlbGxTdHlsZSBuYW1lPSJOb3JtYWwiIHhmSWQ9IjAiIGJ1aWx0aW5JZD0iMCIgaGlkZGVuPSIwIi8+PC9jZWxsU3R5bGVzPjx0YWJsZVN0eWxlcyBjb3VudD0iMCIgZGVmYXVsdFRhYmxlU3R5bGU9IlRhYmxlU3R5bGVNZWRpdW05IiBkZWZhdWx0UGl2b3RTdHlsZT0iUGl2b3RTdHlsZUxpZ2h0MTYiLz48Y29sb3JzPjxpbmRleGVkQ29sb3JzPjxyZ2JDb2xvciByZ2I9IjAwMDAwMDAwIi8+PHJnYkNvbG9yIHJnYj0iMDBGRkZGRkYiLz48cmdiQ29sb3IgcmdiPSIwMEZGMDAwMCIvPjxyZ2JDb2xvciByZ2I9IjAwMDBGRjAwIi8+PHJnYkNvbG9yIHJnYj0iMDAwMDAwRkYiLz48cmdiQ29sb3IgcmdiPSIwMEZGRkYwMCIvPjxyZ2JDb2xvciByZ2I9IjAwRkYwMEZGIi8+PHJnYkNvbG9yIHJnYj0iMDAwMEZGRkYiLz48cmdiQ29sb3IgcmdiPSIwMDAwMDAwMCIvPjxyZ2JDb2xvciByZ2I9IjAwRkZGRkZGIi8+PHJnYkNvbG9yIHJnYj0iMDBGRjAwMDAiLz48cmdiQ29sb3IgcmdiPSIwMDAwRkYwMCIvPjxyZ2JDb2xvciByZ2I9IjAwMDAwMEZGIi8+PHJnYkNvbG9yIHJnYj0iMDBGRkZGMDAiLz48cmdiQ29sb3IgcmdiPSIwMEZGMDBGRiIvPjxyZ2JDb2xvciByZ2I9IjAwMDBGRkZGIi8+PHJnYkNvbG9yIHJnYj0iMDA4MDAwMDAiLz48cmdiQ29sb3IgcmdiPSIwMDAwODAwMCIvPjxyZ2JDb2xvciByZ2I9IjAwMDAwMDgwIi8+PHJnYkNvbG9yIHJnYj0iMDA4MDgwMDAiLz48cmdiQ29sb3IgcmdiPSIwMDgwMDA4MCIvPjxyZ2JDb2xvciByZ2I9IjAwMDA4MDgwIi8+PHJnYkNvbG9yIHJnYj0iMDBDMEMwQzAiLz48cmdiQ29sb3IgcmdiPSIwMDgwODA4MCIvPjxyZ2JDb2xvciByZ2I9IjAwOTk5OUZGIi8+PHJnYkNvbG9yIHJnYj0iMDA5OTMzNjYiLz48cmdiQ29sb3IgcmdiPSIwMEZGRkZDQyIvPjxyZ2JDb2xvciByZ2I9IjAwQ0NGRkZGIi8+PHJnYkNvbG9yIHJnYj0iMDA2NjAwNjYiLz48cmdiQ29sb3IgcmdiPSIwMEZGODA4MCIvPjxyZ2JDb2xvciByZ2I9IjAwMDA2NkNDIi8+PHJnYkNvbG9yIHJnYj0iMDBDQ0NDRkYiLz48cmdiQ29sb3IgcmdiPSIwMDAwMDA4MCIvPjxyZ2JDb2xvciByZ2I9IjAwRkYwMEZGIi8+PHJnYkNvbG9yIHJnYj0iMDBGRkZGMDAiLz48cmdiQ29sb3IgcmdiPSIwMDAwRkZGRiIvPjxyZ2JDb2xvciByZ2I9IjAwODAwMDgwIi8+PHJnYkNvbG9yIHJnYj0iMDA4MDAwMDAiLz48cmdiQ29sb3IgcmdiPSIwMDAwODA4MCIvPjxyZ2JDb2xvciByZ2I9IjAwMDAwMEZGIi8+PHJnYkNvbG9yIHJnYj0iMDAwMENDRkYiLz48cmdiQ29sb3IgcmdiPSIwMENDRkZGRiIvPjxyZ2JDb2xvciByZ2I9IjAwQ0NGRkNDIi8+PHJnYkNvbG9yIHJnYj0iMDBGRkZGOTkiLz48cmdiQ29sb3IgcmdiPSIwMDk5Q0NGRiIvPjxyZ2JDb2xvciByZ2I9IjAwRkY5OUNDIi8+PHJnYkNvbG9yIHJnYj0iMDBDQzk5RkYiLz48cmdiQ29sb3IgcmdiPSIwMEZGQ0M5OSIvPjxyZ2JDb2xvciByZ2I9IjAwMzM2NkZGIi8+PHJnYkNvbG9yIHJnYj0iMDAzM0NDQ0MiLz48cmdiQ29sb3IgcmdiPSIwMDk5Q0MwMCIvPjxyZ2JDb2xvciByZ2I9IjAwRkZDQzAwIi8+PHJnYkNvbG9yIHJnYj0iMDBGRjk5MDAiLz48cmdiQ29sb3IgcmdiPSIwMEZGNjYwMCIvPjxyZ2JDb2xvciByZ2I9IjAwNjY2Njk5Ii8+PHJnYkNvbG9yIHJnYj0iMDA5Njk2OTYiLz48cmdiQ29sb3IgcmdiPSIwMDAwMzM2NiIvPjxyZ2JDb2xvciByZ2I9IjAwMzM5OTY2Ii8+PHJnYkNvbG9yIHJnYj0iMDAwMDMzMDAiLz48cmdiQ29sb3IgcmdiPSIwMDMzMzMwMCIvPjxyZ2JDb2xvciByZ2I9IjAwOTkzMzAwIi8+PHJnYkNvbG9yIHJnYj0iMDA5OTMzNjYiLz48cmdiQ29sb3IgcmdiPSIwMDMzMzM5OSIvPjxyZ2JDb2xvciByZ2I9IjAwMzMzMzMzIi8+PC9pbmRleGVkQ29sb3JzPjwvY29sb3JzPjwvc3R5bGVTaGVldD5QSwMEFAAAAAAACm3xXJeKuxwTAgAAEwIAAAsAAABfcmVscy8ucmVsczxSZWxhdGlvbnNoaXBzIHhtbG5zPSJodHRwOi8vc2NoZW1hcy5vcGVueG1sZm9ybWF0cy5vcmcvcGFja2FnZS8yMDA2L3JlbGF0aW9uc2hpcHMiPjxSZWxhdGlvbnNoaXAgVHlwZT0iaHR0cDovL3NjaGVtYXMub3BlbnhtbGZvcm1hdHMub3JnL29mZmljZURvY3VtZW50LzIwMDYvcmVsYXRpb25zaGlwcy9vZmZpY2VEb2N1bWVudCIgVGFyZ2V0PSJ4bC93b3JrYm9vay54bWwiIElkPSJySWQxIi8+PFJlbGF0aW9uc2hpcCBUeXBlPSJodHRwOi8vc2NoZW1hcy5vcGVueG1sZm9ybWF0cy5vcmcvcGFja2FnZS8yMDA2L3JlbGF0aW9uc2hpcHMvbWV0YWRhdGEvY29yZS1wcm9wZXJ0aWVzIiBUYXJnZXQ9ImRvY1Byb3BzL2NvcmUueG1sIiBJZD0icklkMiIvPjxSZWxhdGlvbnNoaXAgVHlwZT0iaHR0cDovL3NjaGVtYXMub3BlbnhtbGZvcm1hdHMub3JnL29mZmljZURvY3VtZW50LzIwMDYvcmVsYXRpb25zaGlwcy9leHRlbmRlZC1wcm9wZXJ0aWVzIiBUYXJnZXQ9ImRvY1Byb3BzL2FwcC54bWwiIElkPSJySWQzIi8+PC9SZWxhdGlvbnNoaXBzPlBLAwQUAAAAAAAKbfFc65262y0CAAAtAgAADwAAAHhsL3dvcmtib29rLnhtbDx3b3JrYm9vayB4bWxucz0iaHR0cDovL3NjaGVtYXMub3BlbnhtbGZvcm1hdHMub3JnL3NwcmVhZHNoZWV0bWwvMjAwNi9tYWluIj48d29ya2Jvb2tQci8+PHdvcmtib29rUHJvdGVjdGlvbi8+PGJvb2tWaWV3cz48d29ya2Jvb2tWaWV3IHZpc2liaWxpdHk9InZpc2libGUiIG1pbmltaXplZD0iMCIgc2hvd0hvcml6b250YWxTY3JvbGw9IjEiIHNob3dWZXJ0aWNhbFNjcm9sbD0iMSIgc2hvd1NoZWV0VGFicz0iMSIgdGFiUmF0aW89IjYwMCIgZmlyc3RTaGVldD0iMCIgYWN0aXZlVGFiPSIwIiBhdXRvRmlsdGVyRGF0ZUdyb3VwaW5nPSIxIi8+PC9ib29rVmlld3M+PHNoZWV0cz48c2hlZXQgeG1sbnM6cj0iaHR0cDovL3NjaGVtYXMub3BlbnhtbGZvcm1hdHMub3JnL29mZmljZURvY3VtZW50LzIwMDYvcmVsYXRpb25zaGlwcyIgbmFtZT0iUGF5IFJhdGUgU3VtbWFyeSIgc2hlZXRJZD0iMSIgc3RhdGU9InZpc2libGUiIHI6aWQ9InJJZDEiLz48L3NoZWV0cz48ZGVmaW5lZE5hbWVzLz48Y2FsY1ByIGNhbGNJZD0iMTI0NTE5IiBmdWxsQ2FsY09uTG9hZD0iMSIvPjwvd29ya2Jvb2s+UEsDBBQAAAAAAApt8VwkHpui+AEAAPgBAAAaAAAAeGwvX3JlbHMvd29ya2Jvb2sueG1sLnJlbHM8UmVsYXRpb25zaGlwcyB4bWxucz0iaHR0cDovL3NjaGVtYXMub3BlbnhtbGZvcm1hdHMub3JnL3BhY2thZ2UvMjAwNi9yZWxhdGlvbnNoaXBzIj48UmVsYXRpb25zaGlwIFR5cGU9Imh0dHA6Ly9zY2hlbWFzLm9wZW54bWxmb3JtYXRzLm9yZy9vZmZpY2VEb2N1bWVudC8yMDA2L3JlbGF0aW9uc2hpcHMvd29ya3NoZWV0IiBUYXJnZXQ9Ii94bC93b3Jrc2hlZXRzL3NoZWV0MS54bWwiIElkPSJySWQxIi8+PFJlbGF0aW9uc2hpcCBUeXBlPSJodHRwOi8vc2NoZW1hcy5vcGVueG1sZm9ybWF0cy5vcmcvb2ZmaWNlRG9jdW1lbnQvMjAwNi9yZWxhdGlvbnNoaXBzL3N0eWxlcyIgVGFyZ2V0PSJzdHlsZXMueG1sIiBJZD0icklkMiIvPjxSZWxhdGlvbnNoaXAgVHlwZT0iaHR0cDovL3NjaGVtYXMub3BlbnhtbGZvcm1hdHMub3JnL29mZmljZURvY3VtZW50LzIwMDYvcmVsYXRpb25zaGlwcy90aGVtZSIgVGFyZ2V0PSJ0aGVtZS90aGVtZTEueG1sIiBJZD0icklkMyIvPjwvUmVsYXRpb25zaGlwcz5QSwMEFAAAAAAACm3xXGWQeZLPAwAAzwMAABMAAABbQ29udGVudF9UeXBlc10ueG1sPFR5cGVzIHhtbG5zPSJodHRwOi8vc2NoZW1hcy5vcGVueG1sZm9ybWF0cy5vcmcvcGFja2FnZS8yMDA2L2NvbnRlbnQtdHlwZXMiPjxEZWZhdWx0IEV4dGVuc2lvbj0icmVscyIgQ29udGVudFR5cGU9ImFwcGxpY2F0aW9uL3ZuZC5vcGVueG1sZm9ybWF0cy1wYWNrYWdlLnJlbGF0aW9uc2hpcHMreG1sIi8+PERlZmF1bHQgRXh0ZW5zaW9uPSJ4bWwiIENvbnRlbnRUeXBlPSJhcHBsaWNhdGlvbi94bWwiLz48T3ZlcnJpZGUgUGFydE5hbWU9Ii94bC9zdHlsZXMueG1sIiBDb250ZW50VHlwZT0iYXBwbGljYXRpb24vdm5kLm9wZW54bWxmb3JtYXRzLW9mZmljZWRvY3VtZW50LnNwcmVhZHNoZWV0bWwuc3R5bGVzK3htbCIvPjxPdmVycmlkZSBQYXJ0TmFtZT0iL3hsL3RoZW1lL3RoZW1lMS54bWwiIENvbnRlbnRUeXBlPSJhcHBsaWNhdGlvbi92bmQub3BlbnhtbGZvcm1hdHMtb2ZmaWNlZG9jdW1lbnQudGhlbWUreG1sIi8+PE92ZXJyaWRlIFBhcnROYW1lPSIvZG9jUHJvcHMvY29yZS54bWwiIENvbnRlbnRUeXBlPSJhcHBsaWNhdGlvbi92bmQub3BlbnhtbGZvcm1hdHMtcGFja2FnZS5jb3JlLXByb3BlcnRpZXMreG1sIi8+PE92ZXJyaWRlIFBhcnROYW1lPSIvZG9jUHJvcHMvYXBwLnhtbCIgQ29udGVudFR5cGU9ImFwcGxpY2F0aW9uL3ZuZC5vcGVueG1sZm9ybWF0cy1vZmZpY2Vkb2N1bWVudC5leHRlbmRlZC1wcm9wZXJ0aWVzK3htbCIvPjxPdmVycmlkZSBQYXJ0TmFtZT0iL3hsL3dvcmtzaGVldHMvc2hlZXQxLnhtbCIgQ29udGVudFR5cGU9ImFwcGxpY2F0aW9uL3ZuZC5vcGVueG1sZm9ybWF0cy1vZmZpY2Vkb2N1bWVudC5zcHJlYWRzaGVldG1sLndvcmtzaGVldCt4bWwiLz48T3ZlcnJpZGUgUGFydE5hbWU9Ii94bC93b3JrYm9vay54bWwiIENvbnRlbnRUeXBlPSJhcHBsaWNhdGlvbi92bmQub3BlbnhtbGZvcm1hdHMtb2ZmaWNlZG9jdW1lbnQuc3ByZWFkc2hlZXRtbC5zaGVldC5tYWluK3htbCIvPjwvVHlwZXM+UEsBAhQDFAAAAAAACm3xXEbHTUjNAAAAzQAAABAAAAAAAAAAAAAAAIABAAAAAGRvY1Byb3BzL2FwcC54bWxQSwECFAMUAAAAAAAKbfFcByxViisCAAArAgAAEQAAAAAAAAAAAAAAgAH7AAAAZG9jUHJvcHMvY29yZS54bWxQSwECFAMUAAAAAAAKbfFcmVycI5wnAACcJwAAEwAAAAAAAAAAAAAAgAFVAwAAeGwvdGhlbWUvdGhlbWUxLnhtbFBLAQIUAxQAAAAAAApt8VzFmzxhESQAABEkAAAYAAAAAAAAAAAAAACAASIrAAB4bC93b3Jrc2hlZXRzL3NoZWV0MS54bWxQSwECFAMUAAAAAAAKbfFceu7gZDsoAAA7KAAADQAAAAAAAAAAAAAAgAFpTwAAeGwvc3R5bGVzLnhtbFBLAQIUAxQAAAAAAApt8VyXirscEwIAABMCAAALAAAAAAAAAAAAAACAAc93AABfcmVscy8ucmVsc1BLAQIUAxQAAAAAAApt8VzrnbrbLQIAAC0CAAAPAAAAAAAAAAAAAACAAQt6AAB4bC93b3JrYm9vay54bWxQSwECFAMUAAAAAAAKbfFcJB6bovgBAAD4AQAAGgAAAAAAAAAAAAAAgAFlfAAAeGwvX3JlbHMvd29ya2Jvb2sueG1sLnJlbHNQSwECFAMUAAAAAAAKbfFcZZB5ks8DAADPAwAAEwAAAAAAAAAAAAAAgAGVfgAAW0NvbnRlbnRfVHlwZXNdLnhtbFBLBQYAAAAACQAJAD4CAACVggAAAAA=';
+</script>
+<script>
+// ── VERSION ──────────────────────────────────────────────────
+const APP_VERSION = '4.0';
+const APP_DATE    = '2025-07-16';
+const CHANGELOG = [
+  { v:'4.0', date:'2025-07-16', notes:'Blended rate = Weekly Gross ÷ Total Hours; OT Stipend = W2×1.5+Stipend; Med Tests hidden from UI; CA formula rebuilt from Cal OT Excel sheet; comprehensive formula audit' },
+  { v:'3.0', date:'2025-06-01', notes:'CA OT tab added; GSA Per Diem ZIP lookup; History 7d; How to Use guide; fluid typography' },
+  { v:'2.0', date:'2025-05-01', notes:'Vivian fee; loading factor; orient/stipOrient toggle; alloc formula' },
+  { v:'1.0', date:'2025-04-01', notes:'Initial release — NC Standard calculator' },
+];
+// ─────────────────────────────────────────────────────────────
+
+const CL=[{n:'Aya Healthcare',f:.05},{n:'CHOP',f:.03},{n:'Corecivic',f:.065},{n:'Albany Medical',f:.07},{n:'Hoag',f:.065},{n:'KPC',f:.065},{n:'NYCHH',f:.07},{n:'UHS',f:.04},{n:'Kaiser-AMN',f:.05},{n:'Mount Sinai',f:.07},{n:'THR',f:.065},{n:'Henry Ford',f:.05},{n:'HWL NY',f:.05}];
+const S={stip:'Y',stipOT:'Y',stipOrient:'Y',vivian:'N',calVivian:'Y',candIns:'N'};
+let mode='nc',lastResult=null,saveTimer=null,lastSavedHash=null;
+
+const HK='honorvet_hist_v5';
+function loadHist(){try{const raw=localStorage.getItem(HK);if(!raw)return[];const arr=JSON.parse(raw);const cutoff=Date.now()-7*86400*1000;return arr.filter(e=>e.ts>cutoff).sort((a,b)=>b.ts-a.ts)}catch(e){return[]}}
+function saveHist(arr){try{localStorage.setItem(HK,JSON.stringify(arr))}catch(e){}}
+function addToHist(snap){const arr=loadHist();arr.unshift(snap);if(arr.length>50)arr.length=50;saveHist(arr)}
+function clearHist(){if(confirm('Clear all saved packages?')){localStorage.removeItem(HK);renderHist()}}
+
+const sel=document.getElementById('i-client');
+CL.forEach((c,i)=>{const o=document.createElement('option');o.value=i;o.textContent=c.n+' — '+(c.f*100).toFixed(1)+'%';sel.appendChild(o)});
+
+function updateOtStip(){
+  if(S.stip!=='Y'||S.stipOT!=='Y'){return}
+  const w2=parseFloat(document.getElementById('i-w2').value)||0;
+  const sh=parseFloat(document.getElementById('i-stipend').value)||0;
+  const os=w2*1.5+sh;
+  const el=document.getElementById('i-otStipend');
+  if(el)el.value=os.toFixed(2);
+  const disp=document.getElementById('nc-otStip-display');
+  if(disp)disp.textContent=os.toFixed(2);
+}
+
+function pickClient(){const v=sel.value;if(v!==''){document.getElementById('i-mspFee').value=(CL[+v].f*100).toFixed(2);document.getElementById('i-manualFee').value=''}calc()}
+
+function setMode(m){
+  if(m==='guide'){document.body.classList.add('guide-mode');document.body.classList.remove('history-mode');setActiveTab('tab-guide');document.getElementById('warn-std').classList.remove('show');document.getElementById('warn-cal').classList.remove('show');return}
+  if(m==='history'){document.body.classList.add('history-mode');document.body.classList.remove('guide-mode');setActiveTab('tab-history');renderHist();document.getElementById('warn-std').classList.remove('show');document.getElementById('warn-cal').classList.remove('show');return}
+  document.body.classList.remove('guide-mode','history-mode');
+  mode=m;setActiveTab('tab-'+m);
+  document.getElementById('mode-label').textContent=m==='cal'?'California OT':m==='ogs'?'OGS Nurse':'Standard';
+  document.getElementById('warn-std').classList.toggle('show',m==='nc');
+  document.getElementById('warn-cal').classList.toggle('show',m==='cal');
+  document.getElementById('nc-pkg').style.display=m==='nc'?'':'none';
+  document.getElementById('cal-pkg').style.display=m==='cal'?'':'none';
+  document.getElementById('ogs-pkg').style.display=m==='ogs'?'':'none';
+  calc();
+}
+function setActiveTab(id){document.querySelectorAll('.top-tab').forEach(t=>t.classList.remove('on'));document.getElementById(id).classList.add('on')}
+
+function togMedIns(tab,v){
+  const Y=document.getElementById('b-'+tab+'MedIns-y');
+  const N=document.getElementById('b-'+tab+'MedIns-n');
+  const fields=document.getElementById(tab+'-ins-fields');
+  if(Y)Y.className=v==='Y'?'on':'';
+  if(N)N.className=v==='N'?'off':'';
+  if(fields)fields.style.display=v==='Y'?'':'none';
+  if(v==='N'){
+    const typeEl=document.getElementById(tab==='nc'?'i-medInsType':'i-calMedInsType');
+    const amtEl=document.getElementById(tab==='nc'?'i-medInsAmt':'i-calMedInsAmt');
+    if(typeEl)typeEl.selectedIndex=0;
+    if(amtEl)amtEl.value='0';
+  }
+  calc();updateOtStip();
+}
+function tog(k,v){
+  S[k]=v;
+  const Y=document.getElementById('b-'+k+'-y'),N=document.getElementById('b-'+k+'-n');
+  if(Y)Y.className=v==='Y'?'on':'';
+  if(N)N.className=v==='N'?'off':'';
+  if(k==='stip'){document.getElementById('stip-fields').style.display=v==='Y'?'':'none'}
+  if(k==='stipOT'){document.getElementById('ot-stip-row').style.display=v==='Y'?'':'none'}
+  if(k==='candIns'||k==='calVivian'||k==='vivian'||k==='stip'||k==='stipOT')updateOtStip();
+  if(k==='vivian'){const vs=document.getElementById('vivian-status');if(vs)vs.style.color=v==='Y'?'#dc2626':'#94a3b8';}
+  calc();
+}
+
+const V=id=>{const e=document.getElementById(id);return e?+(e.value)||0:0};
+const F=(n,d=2)=>!isFinite(n)?'—':n.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const D=n=>'$'+F(n);
+
+
+const GSA_RATES = {
+  // ── Standard CONUS (default for all unlisted ZIPs) ──
+  "DEFAULT": {city:"Standard CONUS",state:"",lodging:107,meals:68},
+
+  // ── Alabama ──
+  "350":["Birmingham","AL",132,74],"351":["Birmingham","AL",132,74],
+  "364":["Mobile","AL",114,74],
+
+  // ── Alaska ──
+  "995":["Anchorage","AK",192,100],"996":["Anchorage","AK",192,100],
+  "997":["Fairbanks","AK",134,100],"998":["Juneau","AK",188,100],
+  "999":["Ketchikan","AK",131,100],
+
+  // ── Arizona ──
+  "850":["Phoenix","AZ",130,68],"851":["Phoenix","AZ",130,68],
+  "852":["Phoenix","AZ",130,68],"853":["Phoenix","AZ",130,68],
+  "855":["Tucson","AZ",114,68],"857":["Tucson","AZ",114,68],
+  "863":["Flagstaff","AZ",127,68],"864":["Flagstaff","AZ",127,68],
+  "865":["Sedona","AZ",188,68],
+
+  // ── Arkansas ──
+  "722":["Little Rock","AR",107,68],
+
+  // ── California ──
+  "900":["Los Angeles","CA",182,100],"901":["Los Angeles","CA",182,100],
+  "902":["Los Angeles","CA",182,100],"903":["Los Angeles","CA",182,100],
+  "904":["Los Angeles","CA",182,100],"905":["Los Angeles","CA",182,100],
+  "906":["Los Angeles","CA",182,100],"907":["Los Angeles","CA",182,100],
+  "908":["Los Angeles","CA",182,100],"910":["Los Angeles","CA",182,100],
+  "911":["Los Angeles","CA",182,100],"912":["Los Angeles","CA",182,100],
+  "913":["Los Angeles","CA",182,100],"914":["Los Angeles","CA",182,100],
+  "915":["Los Angeles","CA",182,100],"916":["Los Angeles","CA",182,100],
+  "917":["Los Angeles","CA",182,100],"918":["Los Angeles","CA",182,100],
+  "919":["San Diego","CA",160,100],"920":["San Diego","CA",160,100],
+  "921":["San Diego","CA",160,100],"922":["San Diego","CA",160,100],
+  "923":["San Diego","CA",160,100],"924":["San Diego","CA",160,100],
+  "925":["Riverside","CA",119,100],"926":["Orange County","CA",176,100],
+  "927":["Orange County","CA",176,100],"928":["Orange County","CA",176,100],
+  "930":["Ventura","CA",145,100],"931":["Ventura","CA",145,100],
+  "932":["Bakersfield","CA",107,100],"933":["Bakersfield","CA",107,100],
+  "934":["Santa Barbara","CA",225,100],"935":["Santa Barbara","CA",225,100],
+  "936":["Fresno","CA",107,100],"937":["Fresno","CA",107,100],
+  "939":["Salinas","CA",163,100],"940":["San Francisco","CA",295,100],
+  "941":["San Francisco","CA",295,100],"943":["San Jose","CA",195,100],
+  "944":["San Jose","CA",195,100],"945":["Oakland","CA",210,100],
+  "946":["Oakland","CA",210,100],"947":["Berkeley","CA",210,100],
+  "948":["Richmond","CA",210,100],"949":["Marin County","CA",250,100],
+  "950":["San Jose","CA",195,100],"951":["San Jose","CA",195,100],
+  "952":["Stockton","CA",107,100],"953":["Modesto","CA",107,100],
+  "954":["Sacramento","CA",149,100],"955":["Sacramento","CA",149,100],
+  "956":["Sacramento","CA",149,100],"957":["Sacramento","CA",149,100],
+  "958":["Sacramento","CA",149,100],"959":["Redding","CA",107,100],
+  "960":["Eureka","CA",107,100],"961":["Reno area","NV",107,100],
+  "962":["Santa Cruz","CA",207,100],"967":["Napa","CA",275,100],
+  "968":["Santa Rosa","CA",170,100],
+
+  // ── Colorado ──
+  "800":["Denver","CO",180,79],"801":["Denver","CO",180,79],
+  "802":["Denver","CO",180,79],"803":["Denver","CO",180,79],
+  "804":["Denver","CO",180,79],"805":["Denver","CO",180,79],
+  "806":["Colorado Springs","CO",114,79],
+  "807":["Colorado Springs","CO",114,79],
+  "808":["Pueblo","CO",107,79],
+  "809":["Colorado Springs","CO",114,79],
+  "810":["Grand Junction","CO",107,79],
+  "811":["Alamosa","CO",107,79],
+  "812":["Durango","CO",138,79],
+  "813":["Durango","CO",138,79],
+  "814":["Grand Junction","CO",107,79],
+  "815":["Steamboat Springs","CO",152,79],
+  "816":["Glenwood Springs","CO",172,79],
+
+  // ── Connecticut ──
+  "060":["Hartford","CT",147,79],"061":["Hartford","CT",147,79],
+  "062":["Hartford","CT",147,79],"063":["New Haven","CT",150,79],
+  "064":["New Haven","CT",150,79],"065":["New Haven","CT",150,79],
+  "066":["Stamford","CT",226,79],"067":["Stamford","CT",226,79],
+  "068":["Stamford","CT",226,79],"069":["Stamford","CT",226,79],
+
+  // ── DC ──
+  "200":["Washington DC","DC",258,79],"201":["Washington DC","DC",258,79],
+  "202":["Washington DC","DC",258,79],"203":["Washington DC","DC",258,79],
+  "204":["Washington DC","DC",258,79],"205":["Washington DC","DC",258,79],
+
+  // ── Delaware ──
+  "197":["Wilmington","DE",140,79],"198":["Wilmington","DE",140,79],
+  "199":["Wilmington","DE",140,79],
+
+  // ── Florida ──
+  "320":["Jacksonville","FL",113,79],"321":["Daytona Beach","FL",116,79],
+  "322":["Jacksonville","FL",113,79],"323":["Tallahassee","FL",107,79],
+  "324":["Tallahassee","FL",107,79],"325":["Tallahassee","FL",107,79],
+  "326":["Gainesville","FL",107,79],"327":["Orlando","FL",149,79],
+  "328":["Orlando","FL",149,79],"329":["Orlando","FL",149,79],
+  "330":["Miami","FL",219,79],"331":["Miami","FL",219,79],
+  "332":["Miami","FL",219,79],"333":["Fort Lauderdale","FL",189,79],
+  "334":["Fort Lauderdale","FL",189,79],"335":["Tampa","FL",139,79],
+  "336":["Tampa","FL",139,79],"337":["Tampa","FL",139,79],
+  "338":["Tampa","FL",139,79],"339":["Fort Myers","FL",163,79],
+  "341":["Naples","FL",193,79],"342":["Sarasota","FL",153,79],
+  "344":["Pensacola","FL",107,79],"346":["Tampa","FL",139,79],
+  "347":["Orlando","FL",149,79],"349":["Fort Lauderdale","FL",189,79],
+
+  // ── Georgia ──
+  "300":["Atlanta","GA",159,79],"301":["Atlanta","GA",159,79],
+  "302":["Atlanta","GA",159,79],"303":["Atlanta","GA",159,79],
+  "304":["Atlanta","GA",159,79],"305":["Atlanta","GA",159,79],
+  "306":["Atlanta","GA",159,79],"307":["Chatanooga area","GA",107,79],
+  "308":["Augusta","GA",107,79],"309":["Augusta","GA",107,79],
+  "310":["Macon","GA",107,79],"311":["Macon","GA",107,79],
+  "312":["Macon","GA",107,79],"313":["Savannah","GA",135,79],
+  "314":["Savannah","GA",135,79],"315":["Savannah","GA",135,79],
+
+  // ── Hawaii ──
+  "967":["Honolulu","HI",289,142],"968":["Honolulu","HI",289,142],
+
+  // ── Idaho ──
+  "832":["Boise","ID",114,79],"833":["Boise","ID",114,79],
+  "834":["Boise","ID",114,79],"836":["Boise","ID",114,79],
+  "837":["Boise","ID",114,79],
+
+  // ── Illinois ──
+  "600":["Chicago","IL",233,84],"601":["Chicago","IL",233,84],
+  "602":["Chicago","IL",233,84],"603":["Chicago","IL",233,84],
+  "604":["Chicago","IL",233,84],"605":["Chicago","IL",233,84],
+  "606":["Chicago","IL",233,84],"607":["Chicago","IL",233,84],
+  "608":["Chicago","IL",233,84],"609":["Chicago","IL",233,84],
+  "610":["Rockford","IL",107,84],"611":["Rockford","IL",107,84],
+  "616":["Peoria","IL",107,84],"617":["Peoria","IL",107,84],
+  "618":["Champaign","IL",107,84],"619":["Champaign","IL",107,84],
+  "620":["Springfield","IL",107,84],"621":["Springfield","IL",107,84],
+  "622":["Springfield","IL",107,84],"623":["Springfield","IL",107,84],
+  "625":["Springfield","IL",107,84],"626":["Springfield","IL",107,84],
+
+  // ── Indiana ──
+  "460":["Indianapolis","IN",107,79],"461":["Indianapolis","IN",107,79],
+  "462":["Indianapolis","IN",107,79],"463":["Indianapolis","IN",107,79],
+  "464":["Gary","IN",107,79],"465":["Gary","IN",107,79],
+  "466":["Fort Wayne","IN",107,79],"467":["Fort Wayne","IN",107,79],
+
+  // ── Iowa ──
+  "500":["Des Moines","IA",107,79],"501":["Des Moines","IA",107,79],
+  "502":["Des Moines","IA",107,79],
+
+  // ── Kansas ──
+  "660":["Kansas City","KS",127,79],"661":["Kansas City","KS",127,79],
+  "662":["Kansas City","KS",127,79],
+
+  // ── Kentucky ──
+  "400":["Louisville","KY",107,79],"401":["Louisville","KY",107,79],
+  "402":["Louisville","KY",107,79],"403":["Lexington","KY",107,79],
+  "404":["Lexington","KY",107,79],"405":["Lexington","KY",107,79],
+
+  // ── Louisiana ──
+  "700":["New Orleans","LA",168,84],"701":["New Orleans","LA",168,84],
+  "703":["New Orleans","LA",168,84],"704":["New Orleans","LA",168,84],
+  "705":["New Orleans","LA",168,84],"706":["New Orleans","LA",168,84],
+  "707":["Baton Rouge","LA",107,84],"708":["Baton Rouge","LA",107,84],
+
+  // ── Maine ──
+  "040":["Portland","ME",129,79],"041":["Portland","ME",129,79],
+  "042":["Portland","ME",129,79],"043":["Augusta","ME",107,79],
+  "044":["Bangor","ME",107,79],"045":["Bath","ME",107,79],
+  "046":["Rockland","ME",107,79],"047":["Kennebunk","ME",200,79],
+  "048":["Kennebunk","ME",200,79],"049":["Kennebunk","ME",200,79],
+
+  // ── Maryland ──
+  "206":["Suburban MD","MD",203,79],"207":["Suburban MD","MD",203,79],
+  "208":["Suburban MD","MD",203,79],"209":["Suburban MD","MD",203,79],
+  "210":["Baltimore","MD",152,79],"211":["Baltimore","MD",152,79],
+  "212":["Baltimore","MD",152,79],"214":["Baltimore","MD",152,79],
+  "215":["Cumberland","MD",107,79],"216":["Annapolis","MD",152,79],
+  "217":["Annapolis","MD",152,79],"218":["Salisbury","MD",107,79],
+  "219":["Ocean City","MD",172,79],
+
+  // ── Massachusetts ──
+  "010":["Springfield","MA",130,79],"011":["Springfield","MA",130,79],
+  "012":["Pittsfield","MA",130,79],"013":["Springfield","MA",130,79],
+  "014":["Worcester","MA",107,79],"015":["Worcester","MA",107,79],
+  "016":["Worcester","MA",107,79],"017":["Worcester","MA",107,79],
+  "018":["Boston","MA",278,79],"019":["Boston","MA",278,79],
+  "020":["Boston","MA",278,79],"021":["Boston","MA",278,79],
+  "022":["Boston","MA",278,79],"023":["Boston","MA",278,79],
+  "024":["Boston","MA",278,79],"025":["Nantucket","MA",383,79],
+  "026":["Cape Cod","MA",225,79],"027":["Cape Cod","MA",225,79],
+
+  // ── Michigan ──
+  "480":["Detroit","MI",120,79],"481":["Detroit","MI",120,79],
+  "482":["Detroit","MI",120,79],"483":["Detroit","MI",120,79],
+  "484":["Flint","MI",107,79],"485":["Flint","MI",107,79],
+  "486":["Saginaw","MI",107,79],"487":["Saginaw","MI",107,79],
+  "488":["Lansing","MI",107,79],"489":["Lansing","MI",107,79],
+  "490":["Kalamazoo","MI",107,79],"491":["Kalamazoo","MI",107,79],
+  "492":["Grand Rapids","MI",120,79],"493":["Grand Rapids","MI",120,79],
+  "494":["Grand Rapids","MI",120,79],"495":["Grand Rapids","MI",120,79],
+  "496":["Traverse City","MI",107,79],"497":["Traverse City","MI",107,79],
+  "498":["Marquette","MI",107,79],"499":["Marquette","MI",107,79],
+
+  // ── Minnesota ──
+  "550":["Minneapolis","MN",139,84],"551":["Minneapolis","MN",139,84],
+  "553":["Minneapolis","MN",139,84],"554":["Minneapolis","MN",139,84],
+  "555":["Minneapolis","MN",139,84],"556":["Duluth","MN",107,84],
+  "557":["Duluth","MN",107,84],"558":["Duluth","MN",107,84],
+  "559":["Rochester","MN",107,84],"560":["Rochester","MN",107,84],
+
+  // ── Missouri ──
+  "630":["St. Louis","MO",129,79],"631":["St. Louis","MO",129,79],
+  "633":["St. Louis","MO",129,79],"634":["St. Louis","MO",129,79],
+  "640":["Kansas City","MO",127,79],"641":["Kansas City","MO",127,79],
+  "644":["Kansas City","MO",127,79],"645":["Kansas City","MO",127,79],
+  "646":["Kansas City","MO",127,79],"647":["Kansas City","MO",127,79],
+  "648":["Kansas City","MO",127,79],
+
+  // ── Montana ──
+  "590":["Billings","MT",107,79],"591":["Billings","MT",107,79],
+  "592":["Great Falls","MT",107,79],"593":["Missoula","MT",107,79],
+  "594":["Great Falls","MT",107,79],"595":["Helena","MT",107,79],
+  "596":["Bozeman","MT",148,79],"597":["Bozeman","MT",148,79],
+  "598":["Missoula","MT",107,79],"599":["Missoula","MT",107,79],
+
+  // ── Nebraska ──
+  "680":["Omaha","NE",107,79],"681":["Omaha","NE",107,79],
+  "682":["Lincoln","NE",107,79],"683":["Lincoln","NE",107,79],
+  "684":["Lincoln","NE",107,79],"685":["Lincoln","NE",107,79],
+
+  // ── Nevada ──
+  "889":["Las Vegas","NV",140,79],"890":["Las Vegas","NV",140,79],
+  "891":["Las Vegas","NV",140,79],"893":["Las Vegas","NV",140,79],
+  "894":["Reno","NV",107,79],"895":["Reno","NV",107,79],
+  "897":["Carson City","NV",107,79],"898":["Carson City","NV",107,79],
+
+  // ── New Hampshire ──
+  "030":["Manchester","NH",107,79],"031":["Manchester","NH",107,79],
+  "032":["Manchester","NH",107,79],"033":["Concord","NH",107,79],
+  "034":["Keene","NH",107,79],"035":["Littleton","NH",107,79],
+  "036":["Laconia","NH",107,79],"037":["Laconia","NH",107,79],
+  "038":["Portsmouth","NH",147,79],"039":["Portsmouth","NH",147,79],
+
+  // ── New Jersey ──
+  "070":["Newark","NJ",193,84],"071":["Newark","NJ",193,84],
+  "072":["Newark","NJ",193,84],"073":["Newark","NJ",193,84],
+  "074":["Paterson","NJ",193,84],"075":["Paterson","NJ",193,84],
+  "076":["Hackensack","NJ",193,84],"077":["Long Branch","NJ",175,84],
+  "078":["Long Branch","NJ",175,84],"079":["Long Branch","NJ",175,84],
+  "080":["Trenton","NJ",140,84],"081":["Trenton","NJ",140,84],
+  "082":["Atlantic City","NJ",131,84],"083":["Atlantic City","NJ",131,84],
+  "084":["Vineland","NJ",107,84],"085":["New Brunswick","NJ",173,84],
+  "086":["New Brunswick","NJ",173,84],"087":["New Brunswick","NJ",173,84],
+  "088":["New Brunswick","NJ",173,84],"089":["New Brunswick","NJ",173,84],
+
+  // ── New Mexico ──
+  "870":["Albuquerque","NM",107,79],"871":["Albuquerque","NM",107,79],
+  "872":["Albuquerque","NM",107,79],"873":["Albuquerque","NM",107,79],
+  "874":["Albuquerque","NM",107,79],"875":["Albuquerque","NM",107,79],
+  "877":["Santa Fe","NM",153,79],"878":["Santa Fe","NM",153,79],
+  "879":["Santa Fe","NM",153,79],"880":["Las Cruces","NM",107,79],
+  "881":["Las Cruces","NM",107,79],"882":["Las Cruces","NM",107,79],
+  "883":["Alamogordo","NM",107,79],"884":["Taos","NM",153,79],
+
+  // ── New York ──
+  "100":["New York City","NY",313,100],"101":["New York City","NY",313,100],
+  "102":["New York City","NY",313,100],"103":["Staten Island","NY",313,100],
+  "104":["Bronx","NY",313,100],"105":["White Plains","NY",178,100],
+  "106":["White Plains","NY",178,100],"107":["White Plains","NY",178,100],
+  "108":["White Plains","NY",178,100],"109":["White Plains","NY",178,100],
+  "110":["Queens","NY",313,100],"111":["Queens","NY",313,100],
+  "112":["Brooklyn","NY",313,100],"113":["Queens","NY",313,100],
+  "114":["Queens","NY",313,100],"115":["Queens","NY",313,100],
+  "116":["Queens","NY",313,100],"117":["Long Island","NY",199,100],
+  "118":["Long Island","NY",199,100],"119":["Long Island","NY",199,100],
+  "120":["Albany","NY",135,100],"121":["Albany","NY",135,100],
+  "122":["Albany","NY",135,100],"123":["Albany","NY",135,100],
+  "124":["Poughkeepsie","NY",152,100],"125":["Poughkeepsie","NY",152,100],
+  "126":["Poughkeepsie","NY",152,100],"127":["Poughkeepsie","NY",152,100],
+  "128":["Glens Falls","NY",107,100],"129":["Plattsburgh","NY",107,100],
+  "130":["Syracuse","NY",107,100],"131":["Syracuse","NY",107,100],
+  "132":["Syracuse","NY",107,100],"133":["Utica","NY",107,100],
+  "134":["Utica","NY",107,100],"135":["Utica","NY",107,100],
+  "136":["Watertown","NY",107,100],"137":["Binghamton","NY",107,100],
+  "138":["Binghamton","NY",107,100],"139":["Binghamton","NY",107,100],
+  "140":["Buffalo","NY",107,100],"141":["Buffalo","NY",107,100],
+  "142":["Buffalo","NY",107,100],"143":["Niagara Falls","NY",107,100],
+  "144":["Rochester","NY",107,100],"145":["Rochester","NY",107,100],
+  "146":["Rochester","NY",107,100],"147":["Corning","NY",107,100],
+  "148":["Ithaca","NY",107,100],"149":["Elmira","NY",107,100],
+
+  // ── North Carolina ──
+  "270":["Greensboro","NC",107,79],"271":["Greensboro","NC",107,79],
+  "272":["Greensboro","NC",107,79],"273":["Greensboro","NC",107,79],
+  "274":["Winston-Salem","NC",107,79],"275":["Raleigh","NC",137,79],
+  "276":["Raleigh","NC",137,79],"277":["Durham","NC",137,79],
+  "278":["Rocky Mount","NC",107,79],"279":["Rocky Mount","NC",107,79],
+  "280":["Charlotte","NC",142,79],"281":["Charlotte","NC",142,79],
+  "282":["Charlotte","NC",142,79],"283":["Charlotte","NC",142,79],
+  "284":["Wilmington","NC",107,79],"285":["Greenville","NC",107,79],
+  "286":["Asheville","NC",153,79],"287":["Asheville","NC",153,79],
+  "288":["Asheville","NC",153,79],"289":["Asheville","NC",153,79],
+
+  // ── Ohio ──
+  "430":["Columbus","OH",116,79],"431":["Columbus","OH",116,79],
+  "432":["Columbus","OH",116,79],"433":["Columbus","OH",116,79],
+  "434":["Toledo","OH",107,79],"435":["Toledo","OH",107,79],
+  "436":["Toledo","OH",107,79],"437":["Zanesville","OH",107,79],
+  "438":["Zanesville","OH",107,79],"439":["Cambridge","OH",107,79],
+  "440":["Cleveland","OH",127,79],"441":["Cleveland","OH",127,79],
+  "442":["Cleveland","OH",127,79],"443":["Akron","OH",107,79],
+  "444":["Youngstown","OH",107,79],"445":["Youngstown","OH",107,79],
+  "446":["Youngstown","OH",107,79],"447":["Canton","OH",107,79],
+  "448":["Mansfield","OH",107,79],"449":["Mansfield","OH",107,79],
+  "450":["Cincinnati","OH",121,79],"451":["Cincinnati","OH",121,79],
+  "452":["Cincinnati","OH",121,79],"453":["Dayton","OH",107,79],
+  "454":["Dayton","OH",107,79],"455":["Dayton","OH",107,79],
+  "456":["Chillicothe","OH",107,79],"457":["Athens","OH",107,79],
+  "458":["Lima","OH",107,79],
+
+  // ── Oklahoma ──
+  "730":["Oklahoma City","OK",107,79],"731":["Oklahoma City","OK",107,79],
+  "735":["Lawton","OK",107,79],"736":["Oklahoma City","OK",107,79],
+  "737":["Enid","OK",107,79],"738":["Woodward","OK",107,79],
+  "739":["Oklahoma City","OK",107,79],"740":["Tulsa","OK",107,79],
+  "741":["Tulsa","OK",107,79],"743":["Tulsa","OK",107,79],
+  "744":["Muskogee","OK",107,79],"745":["McAlester","OK",107,79],
+  "746":["Ponca City","OK",107,79],"747":["Durant","OK",107,79],
+  "748":["Ardmore","OK",107,79],
+
+  // ── Oregon ──
+  "970":["Portland","OR",163,79],"971":["Portland","OR",163,79],
+  "972":["Portland","OR",163,79],"973":["Portland","OR",163,79],
+  "974":["Salem","OR",107,79],"975":["Medford","OR",107,79],
+  "976":["Klamath Falls","OR",107,79],"977":["Bend","OR",149,79],
+  "978":["Bend","OR",149,79],"979":["Coos Bay","OR",107,79],
+
+  // ── Pennsylvania ──
+  "150":["Pittsburgh","PA",138,84],"151":["Pittsburgh","PA",138,84],
+  "152":["Pittsburgh","PA",138,84],"153":["Pittsburgh","PA",138,84],
+  "154":["Pittsburgh","PA",138,84],"155":["Pittsburgh","PA",138,84],
+  "156":["Pittsburgh","PA",138,84],"157":["Pittsburgh","PA",138,84],
+  "158":["Johnstown","PA",107,84],"159":["Johnstown","PA",107,84],
+  "160":["Butler","PA",107,84],"161":["New Castle","PA",107,84],
+  "162":["Kittanning","PA",107,84],"163":["Oil City","PA",107,84],
+  "164":["Erie","PA",107,84],"165":["Erie","PA",107,84],
+  "166":["Altoona","PA",107,84],"167":["Altoona","PA",107,84],
+  "168":["State College","PA",133,84],"169":["Williamsport","PA",107,84],
+  "170":["Harrisburg","PA",123,84],"171":["Harrisburg","PA",123,84],
+  "172":["Harrisburg","PA",123,84],"173":["York","PA",107,84],
+  "174":["York","PA",107,84],"175":["Lancaster","PA",107,84],
+  "176":["Lancaster","PA",107,84],"177":["Wilkes-Barre","PA",107,84],
+  "178":["Wilkes-Barre","PA",107,84],"179":["Wilkes-Barre","PA",107,84],
+  "180":["Allentown","PA",120,84],"181":["Allentown","PA",120,84],
+  "182":["Allentown","PA",120,84],"183":["Stroudsburg","PA",107,84],
+  "184":["Scranton","PA",107,84],"185":["Scranton","PA",107,84],
+  "186":["Hazleton","PA",107,84],"187":["Hazleton","PA",107,84],
+  "188":["Hazleton","PA",107,84],"189":["Hazleton","PA",107,84],
+  "190":["Philadelphia","PA",215,84],"191":["Philadelphia","PA",215,84],
+  "192":["Philadelphia","PA",215,84],"193":["Philadelphia","PA",215,84],
+  "194":["Philadelphia","PA",215,84],"195":["Philadelphia","PA",215,84],
+  "196":["Philadelphia","PA",215,84],
+
+  // ── Rhode Island ──
+  "028":["Providence","RI",148,79],"029":["Providence","RI",148,79],
+
+  // ── South Carolina ──
+  "290":["Columbia","SC",107,79],"291":["Columbia","SC",107,79],
+  "292":["Columbia","SC",107,79],"293":["Columbia","SC",107,79],
+  "294":["Charleston","SC",171,79],"295":["Florence","SC",107,79],
+  "296":["Greenville","SC",107,79],"297":["Greenville","SC",107,79],
+  "298":["Augusta area","SC",107,79],"299":["Hilton Head","SC",183,79],
+
+  // ── Tennessee ──
+  "370":["Nashville","TN",164,79],"371":["Nashville","TN",164,79],
+  "372":["Nashville","TN",164,79],"373":["Chattanooga","TN",107,79],
+  "374":["Chattanooga","TN",107,79],"376":["Chattanooga","TN",107,79],
+  "377":["Knoxville","TN",107,79],"378":["Knoxville","TN",107,79],
+  "379":["Knoxville","TN",107,79],"380":["Memphis","TN",122,79],
+  "381":["Memphis","TN",122,79],"382":["Memphis","TN",122,79],
+  "383":["Jackson","TN",107,79],"384":["Jackson","TN",107,79],
+  "385":["Jackson","TN",107,79],
+
+  // ── Texas ──
+  "750":["Dallas","TX",166,79],"751":["Dallas","TX",166,79],
+  "752":["Dallas","TX",166,79],"753":["Dallas","TX",166,79],
+  "754":["Dallas","TX",166,79],"755":["Dallas","TX",166,79],
+  "756":["Tyler","TX",107,79],"757":["Tyler","TX",107,79],
+  "758":["Wichita Falls","TX",107,79],"759":["Wichita Falls","TX",107,79],
+  "760":["Fort Worth","TX",166,79],"761":["Fort Worth","TX",166,79],
+  "762":["Fort Worth","TX",166,79],"763":["Wichita Falls","TX",107,79],
+  "764":["Waco","TX",107,79],"765":["Waco","TX",107,79],
+  "766":["Waco","TX",107,79],"767":["Waco","TX",107,79],
+  "768":["Abilene","TX",107,79],"769":["Midland","TX",107,79],
+  "770":["Houston","TX",206,79],"771":["Houston","TX",206,79],
+  "772":["Houston","TX",206,79],"773":["Houston","TX",206,79],
+  "774":["Houston","TX",206,79],"775":["Houston","TX",206,79],
+  "776":["Beaumont","TX",107,79],"777":["Beaumont","TX",107,79],
+  "778":["Bryan","TX",107,79],"779":["Victoria","TX",107,79],
+  "780":["San Antonio","TX",134,79],"781":["San Antonio","TX",134,79],
+  "782":["San Antonio","TX",134,79],"783":["San Antonio","TX",134,79],
+  "784":["Corpus Christi","TX",107,79],"785":["Corpus Christi","TX",107,79],
+  "786":["Austin","TX",189,79],"787":["Austin","TX",189,79],
+  "788":["Austin","TX",189,79],"789":["Fredericksburg","TX",107,79],
+  "790":["Amarillo","TX",107,79],"791":["Amarillo","TX",107,79],
+  "792":["Amarillo","TX",107,79],"793":["Lubbock","TX",107,79],
+  "794":["Lubbock","TX",107,79],"795":["Lubbock","TX",107,79],
+  "796":["Abilene","TX",107,79],"797":["Odessa","TX",107,79],
+  "798":["El Paso","TX",107,79],"799":["El Paso","TX",107,79],
+
+  // ── Utah ──
+  "840":["Salt Lake City","UT",131,79],"841":["Salt Lake City","UT",131,79],
+  "842":["Salt Lake City","UT",131,79],"843":["Ogden","UT",131,79],
+  "844":["Ogden","UT",131,79],"845":["Provo","UT",107,79],
+  "846":["Provo","UT",107,79],"847":["Provo","UT",107,79],
+
+  // ── Vermont ──
+  "050":["White River Jct","VT",107,79],"051":["White River Jct","VT",107,79],
+  "052":["Burlington","VT",145,79],"053":["Burlington","VT",145,79],
+  "054":["Burlington","VT",145,79],"056":["Montpelier","VT",107,79],
+  "057":["Montpelier","VT",107,79],"058":["St Johnsbury","VT",107,79],
+  "059":["St Johnsbury","VT",107,79],
+
+  // ── Virginia ──
+  "220":["Northern VA","VA",199,79],"221":["Northern VA","VA",199,79],
+  "222":["Northern VA","VA",199,79],"223":["Northern VA","VA",199,79],
+  "224":["Northern VA","VA",199,79],"225":["Northern VA","VA",199,79],
+  "226":["Winchester","VA",107,79],"227":["Culpeper","VA",107,79],
+  "228":["Harrisonburg","VA",107,79],"229":["Charlottesville","VA",148,79],
+  "230":["Richmond","VA",148,79],"231":["Richmond","VA",148,79],
+  "232":["Richmond","VA",148,79],"233":["Norfolk","VA",118,79],
+  "234":["Norfolk","VA",118,79],"235":["Norfolk","VA",118,79],
+  "236":["Norfolk","VA",118,79],"237":["Norfolk","VA",118,79],
+  "238":["Richmond","VA",148,79],"239":["Danville","VA",107,79],
+  "240":["Roanoke","VA",107,79],"241":["Roanoke","VA",107,79],
+  "242":["Bristol","VA",107,79],"243":["Blacksburg","VA",107,79],
+  "244":["Staunton","VA",107,79],"245":["Clifton Forge","VA",107,79],
+  "246":["Bluefield","VA",107,79],
+
+  // ── Washington ──
+  "980":["Seattle","WA",224,89],"981":["Seattle","WA",224,89],
+  "982":["Seattle","WA",224,89],"983":["Tacoma","WA",161,89],
+  "984":["Tacoma","WA",161,89],"985":["Olympia","WA",135,89],
+  "986":["Olympia","WA",135,89],"988":["Yakima","WA",107,89],
+  "989":["Yakima","WA",107,89],"990":["Spokane","WA",117,89],
+  "991":["Spokane","WA",117,89],"992":["Spokane","WA",117,89],
+  "993":["Richland","WA",107,89],"994":["Richland","WA",107,89],
+
+  // ── West Virginia ──
+  "247":["Bluefield","WV",107,79],"248":["Beckley","WV",107,79],
+  "249":["Lewisburg","WV",107,79],"250":["Charleston","WV",107,79],
+  "251":["Charleston","WV",107,79],"252":["Charleston","WV",107,79],
+  "253":["Charleston","WV",107,79],"254":["Martinsburg","WV",107,79],
+  "255":["Huntington","WV",107,79],"256":["Huntington","WV",107,79],
+  "257":["Huntington","WV",107,79],"258":["Lewisburg","WV",107,79],
+  "259":["Buckhannon","WV",107,79],"260":["Clarksburg","WV",107,79],
+  "261":["Clarksburg","WV",107,79],"262":["Clarksburg","WV",107,79],
+  "263":["Morgantown","WV",107,79],"264":["Morgantown","WV",107,79],
+  "265":["Morgantown","WV",107,79],"266":["Morgantown","WV",107,79],
+  "267":["Elkins","WV",107,79],"268":["Petersburg","WV",107,79],
+
+  // ── Wisconsin ──
+  "530":["Milwaukee","WI",130,79],"531":["Milwaukee","WI",130,79],
+  "532":["Racine","WI",107,79],"534":["Racine","WI",107,79],
+  "535":["Madison","WI",130,79],"537":["Madison","WI",130,79],
+  "538":["Madison","WI",130,79],"539":["Madison","WI",130,79],
+  "540":["Green Bay","WI",107,79],"541":["Green Bay","WI",107,79],
+  "542":["Green Bay","WI",107,79],"543":["Green Bay","WI",107,79],
+  "544":["Wausau","WI",107,79],"545":["Rhinelander","WI",107,79],
+  "546":["La Crosse","WI",107,79],"547":["La Crosse","WI",107,79],
+  "548":["Superior","WI",107,79],"549":["Superior","WI",107,79],
+
+  // ── Wyoming ──
+  "820":["Cheyenne","WY",107,79],"821":["Cheyenne","WY",107,79],
+  "822":["Wheatland","WY",107,79],"823":["Rawlins","WY",107,79],
+  "824":["Riverton","WY",107,79],"825":["Riverton","WY",107,79],
+  "826":["Casper","WY",107,79],"827":["Casper","WY",107,79],
+  "828":["Gillette","WY",107,79],"829":["Rock Springs","WY",107,79],
+  "830":["Rock Springs","WY",107,79],"831":["Jackson","WY",270,79]
+};
+
+// Auto-calculate OT stipend: (W2 + Stipend) - W2 * CB_Multiplier (Excel F15)
+function downloadPDF(){
+  const name  = (document.getElementById('i-clinicianName')||{}).value||'';
+  const rec   = (document.getElementById('i-recruiterName')||{}).value||'';
+  const tl    = (document.getElementById('i-tlName')||{}).value||'';
+  const dm    = (document.getElementById('i-dmName')||{}).value||'';
+  const title = (document.getElementById('i-clinicianTitle')||{}).value||'';
+  const loc   = (document.getElementById('i-clinicianLocation')||{}).value||'';
+  const r     = lastResult;
+  if(!r){alert('Run a calculation first.');return}
+
+  const modeLabel = r.tab==='nc'?'Standard':r.tab==='cal'?'California OT':'OGS';
+  const date      = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  const F2 = v => '$'+Math.abs(v).toFixed(2);
+  const neg = r.margin<0;
+
+  // Get all inputs for detail section
+  const br   = document.getElementById('i-billRate')?.value||'—';
+  const msp  = document.getElementById('i-mspFee')?.value||'—';
+  const rh   = document.getElementById('i-regHrs')?.value||'—';
+  const oh   = document.getElementById('i-otHrs')?.value||'—';
+  const wk   = document.getElementById('i-weeks')?.value||'—';
+  const ort  = document.getElementById('i-orientHrs')?.value||'0';
+  const w2   = document.getElementById('i-w2')?.value||'—';
+  const sh   = r.tab==='cal'?document.getElementById('i-calStipend')?.value:
+               r.tab==='ogs'?document.getElementById('i-ogsStipend')?.value:
+               document.getElementById('i-stipend')?.value||'—';
+  const client = document.getElementById('i-client');
+  const clientName = client&&client.value!==''?client.options[client.selectedIndex]?.text||'':'—';
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>HonorVet — Pay Rate Summary</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  @page{size:A4;margin:12mm 14mm}
+  body{font-family:'Segoe UI',Arial,sans-serif;color:#1e293b;background:#fff;font-size:11px;line-height:1.4;
+       -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .page{width:100%;padding:0}
+  /* Header */
+  .hdr{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;
+       border-bottom:3px solid #0f172a;margin-bottom:14px}
+  .hdr-logo{font-size:18px;font-weight:900;color:#0f172a;letter-spacing:-.5px}
+  .hdr-logo span{color:#dc2626}
+  .hdr-meta{text-align:right;font-size:10px;color:#64748b}
+  .hdr-meta strong{display:block;font-size:11px;color:#0f172a}
+  /* Clinician */
+  .clinician{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;
+             padding:8px 14px;margin-bottom:12px;display:flex;gap:24px;flex-wrap:wrap}
+  .clin-item label{font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;
+                   letter-spacing:.08em;display:block}
+  .clin-item span{font-size:12px;font-weight:600;color:#0f172a}
+  /* Hero */
+  .hero{border-radius:10px;padding:12px 18px;margin-bottom:12px;display:flex;
+        align-items:center;justify-content:space-between;
+        background:${neg?'#fef2f2':'#f0fdf4'};border:2px solid ${neg?'#fecaca':'#86efac'}}
+  .hero-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+              color:${neg?'#dc2626':'#16a34a'};margin-bottom:2px}
+  .hero-num{font-size:32px;font-weight:900;color:${neg?'#dc2626':'#15803d'};
+            font-variant-numeric:tabular-nums;line-height:1}
+  .hero-sub{font-size:10px;color:#64748b;margin-top:2px}
+  .hero-kpis{display:flex;gap:20px}
+  .kpi label{font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:.06em;display:block}
+  .kpi span{font-size:15px;font-weight:800;color:#0f172a}
+  /* Two-col layout for bottom sections */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+  /* Section */
+  .section{margin-bottom:12px}
+  .section-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+                 color:#94a3b8;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #f1f5f9}
+  /* Grid rows */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+  .row{display:flex;justify-content:space-between;align-items:center;
+       padding:5px 8px;border-radius:6px;background:#f8fafc}
+  .row label{font-size:10px;color:#64748b}
+  .row span{font-size:11px;font-weight:600;color:#0f172a}
+  .row.hl{background:#eff6ff}
+  .row.hl span{color:#1d4ed8;font-weight:800}
+  /* Table */
+  table{width:100%;border-collapse:collapse}
+  th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;
+     padding:4px 8px;text-align:left;border-bottom:1.5px solid #e2e8f0}
+  td{padding:5px 8px;border-bottom:1px solid #f1f5f9;font-size:10px}
+  td:last-child{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+  tr.total td{font-weight:800;color:#0f172a;font-size:11px;border-top:1.5px solid #0f172a;border-bottom:none}
+  /* Footer */
+  .foot{margin-top:12px;padding-top:8px;border-top:1px solid #e2e8f0;
+        display:flex;justify-content:space-between;font-size:9px;color:#94a3b8}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-logo">Honor<span>Vet</span> Technologies</div>
+    <div class="hdr-meta">
+      <strong>Pay Rate Calculation Summary</strong>
+      ${modeLabel} Calculator &nbsp;·&nbsp; ${date}
+    </div>
+  </div>
+
+  <!-- CLINICIAN DETAILS -->
+  ${(name||title||loc)?`<div class="clinician">
+    ${name?`<div class="clin-item"><label>Clinician</label><span>${name}</span></div>`:''}
+    ${title?`<div class="clin-item"><label>Title</label><span>${title}</span></div>`:''}
+    ${loc?`<div class="clin-item"><label>Location</label><span>${loc}</span></div>`:''}
+    ${clientName&&clientName!=='—'?`<div class="clin-item"><label>Client</label><span>${clientName}</span></div>`:''}
+    ${rec?`<div class="clin-item"><label>Recruiter</label><span>${rec}</span></div>`:''}
+    ${tl?`<div class="clin-item"><label>Team Lead</label><span>${tl}</span></div>`:''}
+    ${dm?`<div class="clin-item"><label>Del. Manager</label><span>${dm}</span></div>`:''}
+  </div>`:''}
+
+  <!-- MARGIN HERO -->
+  <div class="hero">
+    <div>
+      <div class="hero-label">${neg?'⚠ ':'✓ '}Hourly Profit Margin · ${modeLabel}</div>
+      <div class="hero-num">${neg?'-':''}${F2(r.margin)}<span style="font-size:18px;font-weight:500;color:#64748b">/hr</span></div>
+      <div class="hero-sub">per billable hour</div>
+    </div>
+    <div class="hero-kpis">
+      <div class="kpi"><label>Project Billing</label><span>${F2(r.billing)}</span></div>
+      <div class="kpi"><label>Total Hours</label><span>${Math.round(r.totalHrs)}</span></div>
+    </div>
+  </div>
+
+  <!-- TWO COLUMN: Hourly + Contract Inputs -->
+  <div class="two-col">
+    <div class="section">
+      <div class="section-title">Hourly Breakdown — Nurse Package</div>
+      <div style="display:grid;gap:5px">
+        <div class="row hl"><label>Total Rate (Blended)</label><span>${F2(r.totalRate)}/hr</span></div>
+        <div class="row hl"><label>OT W-2 Rate</label><span>${F2(r.otW2)}/hr</span></div>
+        <div class="row"><label>W-2 (Taxable)</label><span>${F2(r.w2)}/hr</span></div>
+        <div class="row"><label>Stipend (Non-Taxable)</label><span>${F2(r.stip)}/hr</span></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Contract Inputs</div>
+      <div style="display:grid;gap:5px">
+        <div class="row"><label>Bill Rate</label><span>$${br}/hr</span></div>
+        <div class="row"><label>MSP Fee</label><span>${msp}%</span></div>
+        <div class="row"><label>Reg Hrs/Week</label><span>${rh} hrs</span></div>
+        <div class="row"><label>OT Hrs/Week</label><span>${oh} hrs</span></div>
+        <div class="row"><label>Contract Weeks</label><span>${wk} wks</span></div>
+        <div class="row"><label>Orient Hours</label><span>${ort} hrs</span></div>
+        <div class="row"><label>W-2 Rate</label><span>$${w2}/hr</span></div>
+        <div class="row"><label>Stipend</label><span>$${sh}/hr</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WEEKLY BREAKDOWN -->
+  <div class="section">
+    <div class="section-title">Weekly Breakdown</div>
+    <table>
+      <tr><th>Component</th><th>Weekly</th><th>Monthly (×4)</th></tr>
+      <tr><td>Blended Rate (Nurse)</td><td style="text-align:right;font-weight:700">${F2((r.wkW2+r.wkSt+(r.wkOtSt||0))/r.hrsWk)}/hr</td><td style="text-align:right;color:#94a3b8">—</td></tr>
+      <tr><td>W-2 (Taxable)</td><td>${F2(r.wkW2)}</td><td>${F2(r.wkW2*4)}</td></tr>
+      <tr><td>Stipend (Non-Taxable)</td><td>${F2(r.wkSt)}</td><td>${F2(r.wkSt*4)}</td></tr>
+      ${r.wkOtSt?`<tr><td>OT Stipend</td><td>${F2(r.wkOtSt)}</td><td style="color:#94a3b8">—</td></tr>`:''}
+      <tr><td>Hours/Week</td><td>${r.hrsWk}</td><td style="color:#94a3b8">—</td></tr>
+      <tr class="total"><td>Weekly Gross</td><td>${F2(r.wkW2+(r.wkSt||0)+(r.wkOtSt||0))}</td><td style="color:#94a3b8">—</td></tr>
+    </table>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="foot">
+    <span>HonorVet Technologies · Internal Use Only · Confidential</span>
+    <span>Generated ${date} · v${typeof APP_VERSION!=='undefined'?APP_VERSION:'4.0'}</span>
+  </div>
+
+</div>
+<div id="version-badge" style="position:fixed;bottom:12px;right:14px;z-index:999;cursor:pointer"
+     onclick="document.getElementById('version-modal').style.display='flex'" title="View changelog">
+  <span style="background:#1e293b;color:#94a3b8;font-family:monospace;font-size:0.65rem;padding:3px 9px;border-radius:20px;border:1px solid #334155">v4.0</span>
+</div>
+<div id="version-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center"
+     onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:#fff;border-radius:16px;padding:28px 32px;max-width:460px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <strong style="font-size:1rem;color:#0f172a">HonorVet Nurse Pay Calculator</strong>
+      <button onclick="document.getElementById('version-modal').style.display='none'" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:#64748b">✕</button>
+    </div>
+    <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:12px 16px;margin-bottom:10px">
+      <span style="background:#16a34a;color:#fff;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:20px">v4.0 LATEST</span>
+      <p style="font-size:.78rem;color:#475569;margin-top:6px;line-height:1.5">Excel export with full formatting; clinician + team fields; PDF download; OGS single stipend; GSA lookup; version badge</p>
+    </div>
+    <div style="background:#f8fafc;border-radius:10px;padding:12px 16px;margin-bottom:10px">
+      <span style="background:#475569;color:#fff;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:20px">v3.0</span>
+      <p style="font-size:.78rem;color:#475569;margin-top:6px;line-height:1.5">Two-panel live layout; CA OT tab; History 7d auto-save; How to Use guide</p>
+    </div>
+    <div style="text-align:center;font-size:.7rem;color:#94a3b8;margin-top:12px">HonorVet Technologies · Internal Use Only</div>
+  </div>
+</div>
+</body>
+</html>`;
+
+  // Open print dialog in new window
+  const win = window.open('','_blank','width=900,height=700');
+  win.document.write(html);
+  win.document.close();
+  win.onload = function(){
+    setTimeout(()=>{win.print();},400);
+  };
+}
+
+function downloadExcel(){
+  const r=lastResult;
+  if(!r){alert('Run a calculation first.');return}
+
+  const clinName =document.getElementById('i-clinicianName')?.value||'';
+  const clinTitle=document.getElementById('i-clinicianTitle')?.value||'';
+  const clinLoc  =document.getElementById('i-clinicianLocation')?.value||'';
+  const recName  =document.getElementById('i-recruiterName')?.value||'';
+  const tlName   =document.getElementById('i-tlName')?.value||'';
+  const dmName   =document.getElementById('i-dmName')?.value||'';
+  const br  =+document.getElementById('i-billRate')?.value||0;
+  const msp =+document.getElementById('i-mspFee')?.value||0;
+  const rh  =+document.getElementById('i-regHrs')?.value||0;
+  const oh  =+document.getElementById('i-otHrs')?.value||0;
+  const wk  =+document.getElementById('i-weeks')?.value||0;
+  const ort =+document.getElementById('i-orientHrs')?.value||0;
+  const w2v =+document.getElementById('i-w2')?.value||0;
+  const sh  =+(r.tab==='cal'?document.getElementById('i-calStipend')?.value:
+               r.tab==='ogs'?document.getElementById('i-ogsStipend')?.value:
+               document.getElementById('i-stipend')?.value)||0;
+  const clientEl=document.getElementById('i-client');
+  const clientName=clientEl&&clientEl.value!==''?clientEl.options[clientEl.selectedIndex]?.text||'':'--';
+  const modeLabel=r.tab==='nc'?'Standard':r.tab==='cal'?'California OT':'OGS';
+  const dateStr=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  const wkGross=r.wkW2+(r.wkSt||0)+(r.wkOtSt||0);
+  const blended=r.hrsWk>0?(wkGross/r.hrsWk):0;
+  const neg=r.margin<0;
+
+  // Decode pre-formatted openpyxl template (all colours/fonts/borders baked in)
+  const b64=window._HONORVET_TEMPLATE_B64;
+  if(!b64){alert('Template not loaded yet, please try again.');return}
+  const binStr=atob(b64);
+  const bytes=new Uint8Array(binStr.length);
+  for(let i=0;i<binStr.length;i++) bytes[i]=binStr.charCodeAt(i);
+
+  // Parse ZIP entries
+  function r16(b,o){return b[o]|(b[o+1]<<8)}
+  function r32(b,o){return(b[o]|(b[o+1]<<8)|(b[o+2]<<16)|(b[o+3]<<24))>>>0}
+  const dec=new TextDecoder(),enc=new TextEncoder();
+  const zfiles={};let pos=0;
+  while(pos<bytes.length-4){
+    if(bytes[pos]===0x50&&bytes[pos+1]===0x4B&&bytes[pos+2]===0x03&&bytes[pos+3]===0x04){
+      const fnLen=r16(bytes,pos+26),exLen=r16(bytes,pos+28),cSz=r32(bytes,pos+18);
+      const dStart=pos+30+fnLen+exLen;
+      zfiles[dec.decode(bytes.slice(pos+30,pos+30+fnLen))]={s:dStart,sz:cSz};
+      pos=dStart+cSz;
+    } else pos++;
+  }
+
+  // Build placeholder map
+  const vals={
+    '___MODE_DATE___': modeLabel+'  \xb7  '+dateStr,
+    '___MARGIN___':    (neg?'-':'')+'$'+Math.abs(r.margin).toFixed(2),
+    '___BILLING___':   '$'+r.billing.toFixed(2),
+    '___TOTALHRS___':  String(Math.round(r.totalHrs)),
+    '___CLINNAME___':  clinName||'--',
+    '___CLINTITLE___': clinTitle||'--',
+    '___CLINLOC___':   clinLoc||'--',
+    '___CLIENT___':    clientName,
+    '___RECRUITER___': recName||'--',
+    '___TL___':        tlName||'--',
+    '___DM___':        dmName||'--',
+    '___BR___':        '$'+br.toFixed(2),
+    '___MSP___':       msp.toFixed(1)+'%',
+    '___W2___':        '$'+w2v.toFixed(2),
+    '___SH___':        '$'+sh.toFixed(2),
+    '___RH___':        String(rh),
+    '___OH___':        String(oh),
+    '___WK___':        String(wk),
+    '___ORT___':       String(ort),
+    '___TOTALRATE___': '$'+r.totalRate.toFixed(2)+'/hr',
+    '___W2RATE___':    '$'+r.w2.toFixed(2)+'/hr',
+    '___STIPRATE___':  '$'+r.stip.toFixed(2)+'/hr',
+    '___OTW2RATE___':  '$'+r.otW2.toFixed(2)+'/hr',
+    '___BLENDED___':   '$'+blended.toFixed(2)+'/hr',
+    '___WKW2___':      '$'+r.wkW2.toFixed(2),
+    '___WKW2M___':     '$'+(r.wkW2*4).toFixed(2),
+    '___WKST___':      '$'+(r.wkSt||0).toFixed(2),
+    '___WKSTM___':     '$'+((r.wkSt||0)*4).toFixed(2),
+    '___WKOTST___':    '$'+(r.wkOtSt||0).toFixed(2),
+    '___HRSWK___':     String(r.hrsWk),
+    '___WKGROSS___':   '$'+wkGross.toFixed(2),
+    '___WKGROSSM___':  '$'+(wkGross*4).toFixed(2),
+  };
+
+  // XML-safe replace in sharedStrings
+  function xe(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+  const ssInfo=zfiles['xl/worksheets/sheet1.xml'];
+  if(!ssInfo){alert('Template error.');return}
+  let ss=dec.decode(bytes.slice(ssInfo.s,ssInfo.s+ssInfo.sz));
+  for(const[k,v]of Object.entries(vals)) ss=ss.replaceAll(xe(k),xe(String(v)));
+  const newSS=enc.encode(ss);
+
+  // Rebuild ZIP with updated sharedStrings
+  function crc32(d){let c=0xFFFFFFFF;for(let i=0;i<d.length;i++){c^=d[i];for(let j=0;j<8;j++)c=(c&1)?((c>>>1)^0xEDB88320):(c>>>1)}return(c^0xFFFFFFFF)>>>0}
+  function byt(...a){const o=[];for(const x of a){if(typeof x==='number')o.push(x&0xFF);else if(Array.isArray(x))o.push(...x);else if(x instanceof Uint8Array)for(const b of x)o.push(b)}return o}
+  function l32(n){return[(n>>>0)&0xFF,(n>>>8)&0xFF,(n>>>16)&0xFF,(n>>>24)&0xFF]}
+  function l16(n){return[n&0xFF,(n>>8)&0xFF]}
+
+  const outFiles=[];
+  for(const[name,info]of Object.entries(zfiles)){
+    const data=name==='xl/worksheets/sheet1.xml'?newSS:bytes.slice(info.s,info.s+info.sz);
+    const nb=enc.encode(name),crc=crc32(data);
+    const lh=new Uint8Array(byt(0x50,0x4B,0x03,0x04,0x14,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,l32(crc),l32(data.length),l32(data.length),l16(nb.length),0x00,0x00,nb));
+    outFiles.push({nb,lh,data,crc,len:data.length,off:0});
+  }
+
+  const parts=[];let offset=0;
+  for(const e of outFiles){e.off=offset;parts.push(e.lh);parts.push(e.data);offset+=e.lh.length+e.data.length;}
+  const cdParts=[];
+  for(const e of outFiles) cdParts.push(new Uint8Array(byt(0x50,0x4B,0x01,0x02,0x14,0x00,0x14,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,l32(e.crc),l32(e.len),l32(e.len),l16(e.nb.length),0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,l32(e.off),e.nb)));
+  const cdSize=cdParts.reduce((s,p)=>s+p.length,0);
+  const eocd=new Uint8Array(byt(0x50,0x4B,0x05,0x06,0x00,0x00,0x00,0x00,l16(outFiles.length),l16(outFiles.length),l32(cdSize),l32(offset),0x00,0x00));
+  const all=[...parts,...cdParts,eocd];
+  const total=all.reduce((s,p)=>s+p.length,0);
+  const zip=new Uint8Array(total);let p2=0;
+  for(const pt of all){zip.set(pt,p2);p2+=pt.length;}
+
+  const blob=new Blob([zip],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='HonorVet_'+(clinName.replace(/[^a-zA-Z0-9]/g,'_')||'Calculation')+'_'+new Date().toISOString().slice(0,10)+'.xlsx';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+function calc(){
+  let r;
+  if(mode==='nc')r=calcNC();
+  else if(mode==='cal')r=calcCal();
+  else if(mode==='ogs')r=calcOGS();
+  if(r){lastResult=r;renderResults(r);scheduleSave(r)}
+}
+
+// Debounced auto-save \\u2014 saves 1.5s after user stops editing
+function scheduleSave(r){
+  if(saveTimer)clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{
+    const hash=mode+'|'+V('i-billRate')+'|'+V('i-w2')+'|'+(mode==='cal'?V('i-calStipend'):mode==='ogs'?V('i-housing')+'|'+V('i-meals'):V('i-stipend'));
+    if(hash===lastSavedHash)return;
+    lastSavedHash=hash;
+    const snap={ts:Date.now(),mode,client:clientNameFromInputs(),inputs:snapshotInputs(),state:{...S},result:r};
+    addToHist(snap);
+  },1500);
+}
+
+function snapshotInputs(){
+  const ids=['i-billRate','i-mspFee','i-otMult','i-otAfter','i-regHrs','i-otHrs','i-weeks','i-orientHrs','i-onCall','i-w2','i-stipend','i-otStipend','i-medTests','i-medInsType','i-medInsAmt','i-bonus','i-manualFee','i-client','i-calStipend','i-calBonus','i-calMedTests','i-calMedInsType','i-calMedInsAmt','i-housing','i-meals','i-flight','i-ogsMedTests'];
+  const obj={};ids.forEach(id=>{const e=document.getElementById(id);if(e)obj[id]=e.value});return obj;
+}
+function clientNameFromInputs(){const v=document.getElementById('i-client').value;return v!==''?CL[+v].n:null}
+
+function calcNC(){
+  const br=V('i-billRate'),mfr=parseFloat(document.getElementById('i-manualFee').value),mf=isNaN(mfr)?V('i-mspFee')/100:mfr/100;
+  const om=V('i-otMult')||1.25,oa=V('i-otAfter')||40,rh=V('i-regHrs'),oh=V('i-otHrs'),wk=Math.min(V('i-weeks')||13,13),ort=V('i-orientHrs'),oc=V('i-onCall');
+  const w2=V('i-w2'),sh=S.stip==='Y'?V('i-stipend'):0,os=S.stip==='Y'&&S.stipOT==='Y'?V('i-otStipend'):0;
+  const bn=V('i-bonus'),mt=V('i-medTests'),mi=document.getElementById('i-medInsType').value,ma=V('i-medInsAmt');
+  const lf=w2<30?1.33:1.3,ob=br*om,cr=rh*wk,co=oh*wk,th=cr+co;
+  const vf=S.vivian==='Y'&&(cr-ort)>0?1350*1.07/(cr-ort):0;
+  const rs=br*(1-mf)-vf,ro=ob*(1-mf);
+  let bl;if(oh===0||oa===0)bl=rs;else if(rh+oh<=oa)bl=rs;else{const x=rh+oh-oa;bl=(rh*rs+(oa-rh)*rs+x*ro)/(rh+oh)}
+  const pb=bl*th-br*ort;
+  let medIns=0;if(mi==='Monthly')medIns=ma*4;else if(mi==='Project')medIns=ma;
+  const allocHr=((bn+mt+medIns)/wk)/Math.min(rh||1,36);
+  const pc=ort*w2*lf+(S.stipOrient==='Y'?ort*sh:0)+(cr-ort)*w2*lf+sh*(cr-ort)+co*w2*1.5*lf+(S.stipOT==='Y'?co*os:0)+allocHr*th;
+  const hm=th>0?(pb-pc)/th:0,otW2=w2*1.5;
+  return{margin:hm,billing:pb,totalHrs:th,totalRate:w2+sh,w2,stip:sh,otW2,blended:bl,wkW2:w2*rh+oh*otW2,wkSt:sh*rh,wkOtSt:S.stipOT==='Y'?os*oh:0,hrsWk:rh+oh,onCall:oc/2,cbW2:otW2,cbExp:sh*.25,tab:'nc'};
+}
+function calcCal(){
+  const br=V('i-billRate'),mfr=parseFloat(document.getElementById('i-manualFee').value),mf=isNaN(mfr)?V('i-mspFee')/100:mfr/100;
+  const om=V('i-otMult')||1.18,oa=V('i-otAfter')||40,rh=V('i-regHrs'),oh=V('i-otHrs'),wk=V('i-weeks')||13,ort=V('i-orientHrs'),oc=V('i-onCall');
+  const w2=V('i-w2'),sh=V('i-calStipend'),bn=V('i-calBonus'),mt=V('i-calMedTests');
+  const mi=document.getElementById('i-calMedInsType').value,ma=V('i-calMedInsAmt');
+  const lf=w2<30?1.33:1.3,ob=br*om,cr=rh*wk,co=oh*wk,th=cr+co;
+  const vf=S.calVivian==='Y'&&(cr-ort+co)>0?1350*1.07/(cr-ort+co):0;
+  const rs=br*(1-mf)-vf,ro=ob*(1-mf);
+  let bl;if(oh===0)bl=rs;else if(rh+oh<=oa)bl=rs;else{const x=rh+oh-oa;bl=(rh*rs+(oh-x)*rs+x*ro)/(rh+oh)}
+  const pb=bl*th-br*ort;
+  let medIns=0;if(mi==='Monthly')medIns=ma*4;else if(mi==='Project')medIns=ma;
+  const allocHr=((bn+mt+medIns)/wk)/Math.min(rh||1,36);const otW2=w2*1.5;
+  const pc=ort*w2*lf+ort*sh+(cr-ort)*w2*lf+sh*(cr-ort)+co*otW2*lf+co*sh+allocHr*th;
+  const hm=th>0?(pb-pc)/th:0;
+  return{margin:hm,billing:pb,totalHrs:th,totalRate:w2+sh,w2,stip:sh,otW2,blended:bl,wkW2:w2*rh+oh*otW2,wkSt:sh*rh,hrsWk:rh+oh,onCall:oc/2,cbW2:otW2,cbExp:sh*.25,tab:'cal'};
+}
+function calcOGS(){
+  const br=V('i-billRate'),mf=V('i-mspFee')/100,rh=V('i-regHrs'),wk=V('i-weeks')||13,ort=V('i-orientHrs');
+  const fl=V('i-flight'),mt=V('i-ogsMedTests'),w2=V('i-w2'),hd=V('i-housing'),md=V('i-meals');
+  const pto=w2*.0465,w2n=w2*(1-.0465),cr=rh*wk;
+  const vf=cr>0?1350/cr:0,rs=br*(1-mf)-vf;
+  const pb=rs*(cr-ort);
+  const hWk=hd*7,mWk=md*7,stWk=hWk+mWk,stHr=rh>0?stWk/rh:0;
+  const allocHr=rh>0?((fl+mt)/wk)/rh:0;
+  const pc=ort*w2n*1.25+(cr-ort)*w2n*1.25+stHr*(cr-ort)+allocHr*cr+pto*cr*1.25;
+  const hm=cr>0?(pb-pc)/cr:0;
+  const ptoEl=document.getElementById('o-pto');if(ptoEl){ptoEl.textContent=F(pto);document.getElementById('o-w2net').textContent=F(w2n);document.getElementById('o-viv').textContent=F(vf)}
+  return{margin:hm,billing:pb,totalHrs:cr,totalRate:w2n+stHr+pto,w2n,stip:stHr,pto,otW2:w2n*1.5,blended:rs,w2Wk:w2n*rh,ptoWk:pto*rh,stWk,hrsWk:rh,tab:'ogs'};
+}
+
+function renderResults(r){
+  const neg=r.margin<0,t=r.tab;
+  let h=`<div class="hero ${neg?'neg':'pos'}"><div class="hero-row"><div class="hero-left"><div class="rh-label">${neg?'\\u26a0 ':'\\u2713 '}Hourly Profit Margin${t==='cal'?' \\u00b7 CA OT':t==='ogs'?' \\u00b7 OGS':''}</div><div class="rh-num"><span class="ds">$</span>${F(r.margin)}</div><div class="rh-sub">per billable hour</div></div><div class="rh-kpis"><div class="rh-kpi"><div class="rh-kpi-l">Project Billing</div><div class="rh-kpi-v">${D(r.billing)}</div></div><div class="rh-kpi"><div class="rh-kpi-l">Total Hours</div><div class="rh-kpi-v">${F(r.totalHrs,0)}</div></div></div></div></div>`;
+  h+=`<div class="r-card"><div class="r-card-h">Hourly Breakdown</div><div class="r-metrics"><div class="r-met hi"><div class="r-met-l">Total Rate</div><div class="r-met-v"><span class="d">$</span>${F(r.totalRate)}<span class="u">/hr</span></div></div><div class="r-met"><div class="r-met-l">${t==='ogs'?'W-2 Net':'W-2'}</div><div class="r-met-v"><span class="d">$</span>${F(t==='ogs'?r.w2n:r.w2)}<span class="u">/hr</span></div></div><div class="r-met"><div class="r-met-l">Stipend</div><div class="r-met-v"><span class="d">$</span>${F(r.stip)}<span class="u">/hr</span></div></div><div class="r-met tl"><div class="r-met-l">${t==='ogs'?'PTO':'OT W-2'}</div><div class="r-met-v"><span class="d">$</span>${F(t==='ogs'?r.pto:r.otW2)}<span class="u">/hr</span></div></div></div></div>`;
+  h+=`<div class="r-card"><div class="r-card-h">Weekly Breakdown</div><table class="bt"><thead><tr><th>Component</th><th>Weekly</th><th>Monthly</th></tr></thead><tbody>`;
+  h+=`<tr class="hl"><td>Blended Rate</td><td>${D(r.blended)}/hr</td><td>\\u2014</td></tr>`;
+  if(t==='ogs'){h+=`<tr><td>W-2</td><td>${D(r.w2Wk)}</td><td>${D(r.w2Wk*4)}</td></tr><tr><td>PTO</td><td>${D(r.ptoWk)}</td><td>\\u2014</td></tr><tr><td>Stipend</td><td>${D(r.stWk)}</td><td>${D(r.stWk*4)}</td></tr><tr><td>Hours/Wk</td><td>${F(r.hrsWk,0)}</td><td>\\u2014</td></tr><tr class="tot"><td>Weekly Gross</td><td>${D(r.w2Wk+r.ptoWk+r.stWk)}</td><td>\\u2014</td></tr>`}
+  else{h+=`<tr><td>W-2</td><td>${D(r.wkW2)}</td><td>${D(r.wkW2*4)}</td></tr><tr><td>Stipend</td><td>${D(r.wkSt)}</td><td>${D(r.wkSt*4)}</td></tr>`;if(t==='nc')h+=`<tr><td>OT Stipend</td><td>${D(r.wkOtSt||0)}</td><td>\\u2014</td></tr>`;h+=`<tr><td>Hours/Wk</td><td>${F(r.hrsWk,0)}</td><td>\\u2014</td></tr><tr class="tot"><td>Weekly Gross</td><td>${D(r.wkW2+r.wkSt+(r.wkOtSt||0))}</td><td>\\u2014</td></tr>`}
+  h+=`</tbody></table><div class="chips">`;
+  if(t==='ogs'){h+=`<span class="chip">OT W-2: ${D(r.otW2)}/hr</span>`}
+  else{h+=`<span class="chip">On Call: ${D(r.onCall)}/hr</span><span class="chip">CB W-2: ${D(r.cbW2)}/hr</span><span class="chip">CB Exp: ${D(r.cbExp)}/hr</span>`}
+  h+=`</div></div>`;
+  document.getElementById('results-area').innerHTML=h;
+}
+
+function timeAgo(ts){const s=Math.floor((Date.now()-ts)/1000);if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+' min ago';if(s<86400)return Math.floor(s/3600)+' hr ago';return Math.floor(s/86400)+' days ago'}
+
+function renderHist(){
+  const list=loadHist(),cont=document.getElementById('hist-list');
+  if(list.length===0){cont.innerHTML=`<div class="h-empty"><div class="h-empty-icon">\\ud83d\\udd52</div><div class="h-empty-t">No saved packages yet</div><div class="h-empty-d">Change any input and your calculation auto-saves here for 7 days.</div></div>`;return}
+  let h='<div class="h-list">';
+  list.forEach((e,i)=>{
+    const tag=e.mode==='cal'?'<span class="h-tag ca">CA</span>':e.mode==='ogs'?'<span class="h-tag og">OGS</span>':'<span class="h-tag">Std</span>';
+    const m=e.result.margin,neg=m<0;
+    h+=`<div class="h-item" id="hi-${i}"><div class="h-item-head" onclick="toggleHist(${i})"><div class="h-item-margin ${neg?'neg':'pos'}">${neg?'-':''}$${F(Math.abs(m))}/hr</div><div class="h-item-body"><div class="h-item-name">${e.client||'Custom'} ${tag}</div><div class="h-item-meta">${new Date(e.ts).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})} \\u00b7 ${timeAgo(e.ts)}</div></div><svg class="h-item-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><div class="h-item-detail"><div class="h-d-grid"><div class="h-d-card"><div class="h-d-h">Billing</div><div class="h-d-row"><span>Bill Rate</span><span>$${F(+e.inputs['i-billRate'])}</span></div><div class="h-d-row"><span>MSP Fee</span><span>${F(+e.inputs['i-mspFee'])}%</span></div><div class="h-d-row"><span>Reg Hrs/Wk</span><span>${e.inputs['i-regHrs']}</span></div><div class="h-d-row"><span>OT Hrs/Wk</span><span>${e.inputs['i-otHrs']||0}</span></div><div class="h-d-row"><span>Weeks</span><span>${e.inputs['i-weeks']}</span></div></div><div class="h-d-card"><div class="h-d-h">Package</div><div class="h-d-row"><span>W-2</span><span>$${F(+e.inputs['i-w2'])}</span></div><div class="h-d-row"><span>Stipend</span><span>$${F(+(e.mode==='cal'?e.inputs['i-calStipend']:e.inputs['i-stipend']||0))}</span></div><div class="h-d-row"><span>Vivian</span><span>${e.mode==='cal'?e.state.calVivian:e.state.vivian}</span></div><div class="h-d-row"><span>Project Billing</span><span>${D(e.result.billing)}</span></div><div class="h-d-row"><span>Total Hours</span><span>${F(e.result.totalHrs,0)}</span></div></div></div><button class="h-load-btn" onclick="loadFromHist(${i})">\\u21bb Load into Calculator</button></div></div>`;
+  });
+  h+='</div>';cont.innerHTML=h;
+}
+function toggleHist(i){const el=document.getElementById('hi-'+i);document.querySelectorAll('.h-item').forEach(it=>{if(it!==el)it.classList.remove('open')});el.classList.toggle('open')}
+
+function loadFromHist(i){
+  const list=loadHist(),e=list[i];if(!e)return;
+  setMode(e.mode);
+  Object.assign(S,e.state);
+  ['stip','stipOT','stipOrient','vivian','calVivian'].forEach(k=>{
+    if(S[k]){const Y=document.getElementById('b-'+k+'-y'),N=document.getElementById('b-'+k+'-n');
+    if(Y)Y.className=S[k]==='Y'?'on':'';if(N)N.className=S[k]==='N'?'off':''}
+  });
+  document.getElementById('stip-fields').style.display=S.stip==='Y'?'':'none';
+  document.getElementById('ot-stip-row').style.display=S.stipOT==='Y'?'':'none';
+  Object.keys(e.inputs).forEach(id=>{const el=document.getElementById(id);if(el)el.value=e.inputs[id]});
+  calc();
+}
+
+calc();
+</script>
+
+<div id="version-badge" style="position:fixed;bottom:12px;right:14px;z-index:999;cursor:pointer"
+     onclick="document.getElementById('version-modal').style.display='flex'" title="View changelog">
+  <span style="background:#1e293b;color:#94a3b8;font-family:monospace;font-size:0.65rem;padding:3px 9px;border-radius:20px;border:1px solid #334155">v4.0</span>
+</div>
+<div id="version-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center"
+     onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:#fff;border-radius:16px;padding:28px 32px;max-width:460px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <strong style="font-size:1rem;color:#0f172a">HonorVet Nurse Pay Calculator</strong>
+      <button onclick="document.getElementById('version-modal').style.display='none'" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:#64748b">✕</button>
+    </div>
+    <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:12px 16px;margin-bottom:10px">
+      <span style="background:#16a34a;color:#fff;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:20px">v4.0 LATEST</span>
+      <p style="font-size:.78rem;color:#475569;margin-top:6px;line-height:1.5">Excel export with full formatting; clinician + team fields; PDF download; OGS single stipend; GSA lookup; version badge</p>
+    </div>
+    <div style="text-align:center;font-size:.7rem;color:#94a3b8;margin-top:12px">HonorVet Technologies · Internal Use Only</div>
+  </div>
+</div>
+</body>
+</html>
