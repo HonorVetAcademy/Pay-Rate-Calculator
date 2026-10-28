@@ -115,9 +115,9 @@ select{font-family:var(--sans);font-weight:500;cursor:pointer;background-image:u
 .results-body::-webkit-scrollbar{width:6px}
 .results-body::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
 
-.hero{border-radius:12px;padding:var(--sp-4) var(--sp-5);position:relative;overflow:hidden;margin-bottom:8px;transition:all .3s}
-.hero.pos{background:linear-gradient(135deg,#064e3b,#047857,#059669);box-shadow:0 6px 24px rgba(5,150,105,.25)}
-.hero.neg{background:linear-gradient(135deg,#7f1d1d,#b91c1c,#ef4444);box-shadow:0 6px 24px rgba(239,68,68,.25)}
+.hero{border-radius:12px;padding:var(--sp-4) var(--sp-5);position:relative;overflow:hidden;margin-bottom:8px;transition:all .3s;color:#ffffff}
+.hero.pos{background:linear-gradient(135deg,#065f46,#059669,#10b981);box-shadow:0 8px 32px rgba(5,150,105,.45);border:1px solid rgba(16,185,129,.3)}
+.hero.neg{background:linear-gradient(135deg,#991b1b,#dc2626,#ef4444);box-shadow:0 8px 32px rgba(220,38,38,.5);border:1px solid rgba(239,68,68,.4)}.hero.warn{background:#fbbf24;box-shadow:0 8px 32px rgba(251,191,36,.5);border:2px solid #f59e0b;color:#1a1a1a}.hero.warn .rh-kpi{background:rgba(0,0,0,.08);border-color:rgba(0,0,0,.12)}.hero.warn .rh-kpi-l{color:rgba(0,0,0,.6)}.hero.warn .rh-kpi-v{color:#1a1a1a}.hero.warn .rh-label{color:rgba(0,0,0,.7)}.hero.warn .rh-sub{color:rgba(0,0,0,.55)}.hero.warn .rh-num{color:#1a1a1a}.hero.warn .ds{color:rgba(0,0,0,.5)}
 .hero::before{content:'';position:absolute;top:-30%;right:-15%;width:50%;height:160%;border-radius:50%;background:rgba(255,255,255,.04)}
 .hero-row{display:flex;flex-direction:column;gap:8px;position:relative;z-index:1}
 .hero-left{min-width:0}
@@ -125,9 +125,9 @@ select{font-family:var(--sans);font-weight:500;cursor:pointer;background-image:u
 .rh-num{font-family:var(--mono);font-weight:900;color:#fff;font-size:var(--f-hero);line-height:1;letter-spacing:-1.5px}
 .hero.neg .rh-num{color:#fecaca}
 .rh-num .ds{font-size:var(--f-base);opacity:.4;vertical-align:top;margin-top:3px;display:inline-block;margin-right:2px}
-.rh-sub{font-size:var(--f-xs);color:rgba(255,255,255,.4);font-weight:500;margin-top:2px}
+.rh-sub{font-size:var(--f-xs);color:rgba(255,255,255,.65);font-weight:600;margin-top:2px}
 .rh-kpis{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.rh-kpi{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.08);border-radius:7px;padding:5px 8px}
+.rh-kpi{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:5px 8px}
 .rh-kpi-l{font-size:var(--f-xs);font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:1px}
 .rh-kpi-v{font-family:var(--mono);font-size:var(--f-sm);font-weight:700;color:#fff}
 
@@ -551,7 +551,7 @@ body.minwage-mode .alt-view.minwage{display:block !important;position:fixed;top:
       <div class="section-head">One-Time &amp; Benefits</div>
       <input type="hidden" id="i-medTests" value="300"/>
       <div style="font-size:var(--f-xs);color:#94a3b8;margin-bottom:var(--sp-1);background:#f8fafc;border-radius:6px;padding:4px 8px;border:1px solid #e2e8f0;display:none">Med Tests: <strong style="color:#475569">$300 included</strong> as fixed cost</div>
-      <div class="fg"><label>Completion Bonus</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-bonus" value="0" step="1" oninput="calc()" placeholder="0"/></div></div>
+      <div class="fg"><label>Completion Bonus <span style="font-size:9px;color:#94a3b8;font-weight:600">max $250</span></label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-bonus" value="0" step="1" max="250" oninput="if(parseFloat(this.value)>250)this.value=250;calc()" placeholder="0"/></div></div>
       <div class="fg"><label>Monthly Reimb. (Parking/Tolls/Other)</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-otherReimb" value="0" step="1" oninput="calc()" placeholder="0"/></div></div>
       <div class="fg"><label>Any Other Payment (one-time $)</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-anyOther" value="0" step="1" oninput="calc()" placeholder="0"/></div></div>
       <div class="row2">
@@ -597,7 +597,7 @@ body.minwage-mode .alt-view.minwage{display:block !important;position:fixed;top:
       <div class="section-head">One-Time &amp; Benefits</div>
       <input type="hidden" id="i-calMedTests" value="300"/>
       <div style="font-size:var(--f-xs);color:#94a3b8;margin-bottom:var(--sp-1);background:#f8fafc;border-radius:6px;padding:4px 8px;border:1px solid #e2e8f0;display:none">Med Tests: <strong style="color:#475569">$300 included</strong> as fixed cost</div>
-      <div class="fg"><label>Completion Bonus</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-calBonus" value="0" step="1" oninput="calc()" placeholder="0"/></div></div>
+      <div class="fg"><label>Completion Bonus <span style="font-size:9px;color:#94a3b8;font-weight:600">max $250</span></label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-calBonus" value="0" step="1" max="250" oninput="if(parseFloat(this.value)>250)this.value=250;calc()" placeholder="0"/></div></div>
       <div class="fg"><label>Monthly Reimb. (Parking/Tolls/Other)</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-calOtherReimb" value="0" step="1" oninput="calc()" placeholder="0"/></div></div>
       <div class="fg"><label>Any Other Payment (one-time $)</label><div class="iw"><span class="pfx">$</span><input type="number" class="hp" id="i-calAnyOther" value="0" step="1" oninput="calc()" placeholder="0"/></div></div>
       <div class="row2">
@@ -1477,7 +1477,7 @@ function downloadPDF(){
   <!-- MARGIN HERO -->
   <div class="hero">
     <div>
-      <div class="hero-label">${neg?'⚠ ':'✓ '}Hourly Profit Margin · ${modeLabel}</div>
+      <div class="hero-label">${neg||r.margin<8?'⚠ ':r.margin>=12?'✓ ':'~ '}Hourly Profit Margin · ${modeLabel}</div>
       <div class="hero-num">${neg?'-':''}${F2(r.margin)}<span style="font-size:18px;font-weight:500;color:#64748b">/hr</span></div>
       <div class="hero-sub">per billable hour</div>
     </div>
@@ -2666,7 +2666,8 @@ function calcOGS(){
 
 function renderResults(r){
   const neg=r.margin<0,t=r.tab;
-  let h=`<div class="hero ${neg?'neg':'pos'}"><div class="hero-row"><div class="hero-left"><div class="rh-label">${neg?'⚠ ':'✓ '}Hourly Profit Margin${t==='cal'?' · CA OT':t==='ogs'?' · OGS':''}</div><div class="rh-num"><span class="ds">$</span>${F(r.margin)}</div><div class="rh-sub">per billable hour</div></div><div class="rh-kpis"><div class="rh-kpi"><div class="rh-kpi-l">Project Billing</div><div class="rh-kpi-v">${D(r.billing)}</div></div><div class="rh-kpi" style="border-left:2px solid rgba(255,255,255,.15)"><div class="rh-kpi-l">Est. Project Profit</div><div class="rh-kpi-v" style="color:${neg?'#fca5a5':'#86efac'}">${neg?'-':''}${D(Math.abs(r.margin*r.totalHrs))}</div></div><div class="rh-kpi"><div class="rh-kpi-l">Total Hours</div><div class="rh-kpi-v">${F(r.totalHrs,0)}</div></div></div></div></div>`;
+  const hcls=neg?'neg':r.margin>=12?'pos':r.margin>=8?'warn':'neg';
+  let h=`<div class="hero ${hcls}"><div class="hero-row"><div class="hero-left"><div class="rh-label">${neg?'⚠ ':'✓ '}Hourly Profit Margin${t==='cal'?' · CA OT':t==='ogs'?' · OGS':''}</div><div class="rh-num"><span class="ds">$</span>${F(r.margin)}</div><div class="rh-sub">per billable hour</div><div style="margin-top:10px"><div style="height:6px;border-radius:6px;background:rgba(255,255,255,.15);overflow:hidden"><div style="height:100%;border-radius:6px;transition:width .6s ease,background .6s ease;width:${Math.min(Math.max((r.margin/18)*100,0),100)}%;background:${r.margin>=12?'#4ade80':r.margin>=8?'#fbbf24':'#f87171'}"></div></div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:5px"><span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:${r.margin>=12?'#4ade80':r.margin>=8?'#fbbf24':'#f87171'}">${r.margin>=12?'Strong ✓':r.margin>=8?'Acceptable':'Low ⚠'}</span></div>${(r.margin<8)?'<div style="margin-top:8px;background:#ffffff;border:2px solid #dc2626;border-radius:8px;padding:9px 13px;font-size:11px;font-weight:800;color:#dc2626;display:flex;align-items:flex-start;gap:8px"><span style=\"font-size:16px;flex-shrink:0\">\u26a0</span><span>Margin is below $8/hr \u2014 consider reducing package costs or seek approval from your manager.</span></div>':''}</div></div><div class="rh-kpis"><div class="rh-kpi"><div class="rh-kpi-l">Project Billing</div><div class="rh-kpi-v">${D(r.billing)}</div></div><div class="rh-kpi" style="border-left:2px solid rgba(255,255,255,.15)"><div class="rh-kpi-l">Est. Project Profit</div><div class="rh-kpi-v" style="color:${neg?'#fca5a5':'#86efac'}">${neg?'-':''}${D(Math.abs(r.margin*r.totalHrs))}</div></div><div class="rh-kpi"><div class="rh-kpi-l">Total Hours</div><div class="rh-kpi-v">${F(r.totalHrs,0)}</div></div></div></div></div>`;
   h+=`<div class="r-card"><div class="r-card-h">Hourly Breakdown</div><div class="r-metrics"><div class="r-met hi"><div class="r-met-l">Total Rate</div><div class="r-met-v"><span class="d">$</span>${F(r.totalRate)}<span class="u">/hr</span></div></div><div class="r-met"><div class="r-met-l">${t==='ogs'?'W-2 Net':'W-2'}</div><div class="r-met-v"><span class="d">$</span>${F(t==='ogs'?r.w2n:r.w2)}<span class="u">/hr</span></div></div><div class="r-met"><div class="r-met-l">Stipend</div><div class="r-met-v"><span class="d">$</span>${F(r.stip)}<span class="u">/hr</span></div></div><div class="r-met tl"><div class="r-met-l">${t==='ogs'?'PTO':'OT W-2'}</div><div class="r-met-v"><span class="d">$</span>${F(t==='ogs'?r.pto:r.otW2)}<span class="u">/hr</span></div></div></div></div>`;
   h+=`<div class="r-card"><div class="r-card-h">Weekly Breakdown</div><table class="bt"><thead><tr><th>Component</th><th>Weekly</th><th>Monthly</th></tr></thead><tbody>`;
   h+=`<tr class="hl"><td>Blended Rate</td><td>${D(r.blended)}/hr</td><td>—</td></tr>`;
